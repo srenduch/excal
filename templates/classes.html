@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% for cls in classes %}
+        <a href="{{ url_for('cls', cls_id=cls['id']) }}">            
+            <h2>{{ cls['title'] }}</h2>
+        </a>
+        <span class="badge badge-primary">{{ cls['created'] }}</span>
+        <hr>
+    {% endfor %}
+{% endblock %}

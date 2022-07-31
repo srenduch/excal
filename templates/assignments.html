@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {% for assignment in assignments %}
+        <a href="{{ url_for('assignment', assign_id=assignment['id']) }}">            
+            <h2>{{ assignment['title'] }}</h2>
+        </a>
+        <span class="badge badge-primary">{{ assignment['time_remaining'] }}</span>
+        <hr>
+    {% endfor %}
+{% endblock %}
