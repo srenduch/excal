@@ -1,28 +1,34 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% for assignment in assignments %}
-        <a href="{{ url_for('assignment', assign_id=assignment['id']) }}">            
-            <h2>{{ assignment['title'] }}</h2>
-        </a>
-        <h5>{{ assignment['item_type'] }}</h5>
-        <span class="badge badge-primary">{{ assignment['time_remaining'] }}</span>
-        <hr>
-    {% endfor %}
+    {% if assignments %}
+        {% for assignment in assignments %}
+            <a href="{{ url_for('assignment', assign_id=assignment['id']) }}">            
+                <h2>{{ assignment['title'] }}</h2>
+            </a>
+            <h5>{{ assignment['item_type'] }}</h5>
+            <span class="badge badge-primary">{{ assignment['time_remaining'] }}</span>
+            <hr>
+        {% endfor %}
+    {% endif %}
     
-    {% for cls in classes %}
-        <a href="{{ url_for('cls', class_id=cls['id']) }}">
-            <h2>{{ cls['title'] }}</h2>
-        </a>
-        <span class="badge badge-primary">{{ cls['time_remaining'] }}</span>
-        <hr>
-    {% endfor %}
+    {% if classes %}
+        {% for cls in classes %}
+            <a href="{{ url_for('cls', class_id=cls['id']) }}">
+                <h2>{{ cls['title'] }}</h2>
+            </a>
+            <span class="badge badge-primary">{{ cls['time_remaining'] }}</span>
+            <hr>
+        {% endfor %}
+    {% endif %}
 
-    {% for test in tests %}
-        <a href="{{ url_for('test', test_id=test['id']) }}">
-            <h2>{{ test['title'] }}</h2>
-        </a>
-        <span class="badge badge-primary">{{ test['time_remaining'] }}</span>
-        <hr>
-    {% endfor %}
+    {% if tests %}
+        {% for test in tests %}
+            <a href="{{ url_for('test', test_id=test['id']) }}">
+                <h2>{{ test['title'] }}</h2>
+            </a>
+            <span class="badge badge-primary">{{ test['time_remaining'] }}</span>
+            <hr>
+        {% endfor %}
+    {% endif %}
 {% endblock %}

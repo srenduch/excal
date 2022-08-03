@@ -1,10 +1,14 @@
 CREATE TABLE IF NOT EXISTS assignments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    title TEXT NOT NULL,
-    body TEXT NOT NULL,
     item_type TEXT NOT NULL,
-    time_remaining DATE
+    title TEXT NOT NULL,
+    color TEXT NOT NULL,
+    content TEXT NOT NULL,
+    date TEXT NOT NULL,
+    time TEXT,
+    notes TEXT,
+    time_remaining TEXT
 );
 
 CREATE TABLE IF NOT EXISTS classes (

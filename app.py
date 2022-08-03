@@ -15,12 +15,28 @@ def get_db_conn() :
     return conn
 
 # Assignments page
-@app.route('/assignments')
+@app.route('/assignments/')
 def assignment_page() :
     conn = get_db_conn()
     assignments = conn.execute("SELECT * FROM assignments").fetchall()
     conn.close()
-    return render_template('index.html', assignments=assignments)
+    return render_template('index.html', subdir='assignments/', assignments=assignments, classes=None, tests=None)
+
+# Classes page
+@app.route('/classes/')
+def cls_page() :
+    conn = get_db_conn()
+    classes = conn.execute("SELECT * FROM classes").fetchall()
+    conn.close()
+    return render_template('index.html', subdir='classes/', assignments=None, classes=classes, tests=None)
+
+# Tests page
+@app.route('/tests/')
+def test_page() :
+    conn = get_db_conn()
+    tests = conn.execute("SELECT * FROM tests").fetchall()
+    conn.close()
+    return render_template('index.html', subdir='tests/', assignments=None, classes=None, tests=tests)
 
 # Individual assignment items
 @app.route('/assignments/<int:assign_id>', methods=['GET', 'POST'])
@@ -33,7 +49,7 @@ def assignment(assign_id) :
         conn.close()
     else :
         abort(404)
-    return render_template('assignment_item.html', assignment=assignment)
+    return render_template('item.html', assignment=assignment, cls=None, test=None)
 
 # Individual class items
 @app.route('/classes/<int:class_id>')
@@ -43,7 +59,7 @@ def cls(class_id) :
     conn.close()
     if not cls :
         abort(404)
-    return render_template('class_item.html', cls=cls)
+    return render_template('item.html', cls=cls)
 
 # Individual test items
 @app.route('/tests/<int:test_id>')
@@ -53,7 +69,36 @@ def test(test_id) :
     conn.close()
     if not test :
         abort(404)
-    return render_template('test_item.html', test=test)
+    return render_template('item.html', test=test)
+
+# New
+@app.route('/new/', methods=['GET', 'POST'])
+def new() :
+    if request.method == 'POST' :
+        item_type = request.form['item_type']
+        title = request.form['title']
+        color = request.form['color']
+        content = request.form['content']
+        date = request.form['date'] 
+        time = request.form['time']
+        notes = request.form['notes']
+        time_remaining = datetime.strptime(f"{request.form['date']} {request.form['time']}" , '%Y-%m-%d %H:%M') - datetime.now()
+        time_remaining = (datetime.min + time_remaining)
+        time_remaining = f"{time_remaining.day:02d}:{time_remaining.hour:02d}:{time_remaining.minute:02d}:{time_remaining.second:02d}"
+
+        if not title :
+            flash('Could not create item, title is empty', 'danger')
+        else :
+            conn = get_db_conn()
+            conn.execute("INSERT INTO assignments (item_type, title, color, content, date, time, notes, time_remaining) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", (item_type, title, color, content, date, time, notes, time_remaining))
+            conn.commit()
+            conn.close()
+            flash(f'Item with title \'{title}\' created', 'success')
+            
+            return redirect(url_for('new'))
+
+    today = datetime.now().strftime('%Y-%m-%d')
+    return render_template('modify.html', today=today)
 
 # Homepage
 @app.route('/')
@@ -63,13 +108,16 @@ def index() :
     classes = conn.execute("SELECT * FROM classes").fetchall()
     tests = conn.execute("SELECT * FROM tests").fetchall()
 
-    conn.executemany("UPDATE assignments SET time_remaining = ?", [(str(abs(datetime.now() - datetime.strptime(assignment['created'], '%Y-%m-%d %H:%M:%S'))), ) for assignment in assignments])
-    conn.executemany("UPDATE assignments SET time_remaining = ?", [(str(abs(datetime.now() - datetime.strptime(cls['created'], '%Y-%m-%d %H:%M:%S'))), ) for cls in classes])
-    conn.executemany("UPDATE assignments SET time_remaining = ?", [(str(abs(datetime.now() - datetime.strptime(test['created'], '%Y-%m-%d %H:%M:%S'))), ) for test in tests])
+    for assignment in assignments :
+        time_remaining = datetime.strptime(f"{assignment['date']} {assignment['time']}" , '%Y-%m-%d %H:%M') - datetime.now()
+        time_remaining = (datetime.min + time_remaining)
+        time_remaining = f"{time_remaining.day:02d}:{time_remaining.hour:02d}:{time_remaining.minute:02d}:{time_remaining.second:02d}"
+        print(time_remaining)
+        conn.execute("UPDATE assignments SET time_remaining = ? WHERE id = ?", (time_remaining, assignment['id']))
     conn.commit()
     conn.close()
 
-    return render_template('index.html', assignments=assignments, classes=classes, tests=tests)
+    return render_template('index.html', assignments=assignments, classes=None, tests=None)
 
 if __name__ == "__main__" :
-    app.run(host ='0.0.0.0')
+    app.run(debug=True, host ='0.0.0.0')

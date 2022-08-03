@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>{% block title %} {{ assignment['title'] }} {% endblock %}</h2>
+    <span class="badge badge-primary">{{ assignment['time_remaining'] }}</span>
+    <p>{{ assignment['body'] }}</p>
+
+    <h2>{% block title %} {{ cls['title'] }} {% endblock %}</h2>
+    <span class="badge badge-primary">{{ cls['time_remaining'] }}</span>
+    <p>{{ cls['body'] }}</p>
+
+    <h2>{% block title %} {{ test['title'] }} {% endblock %}</h2>
+    <span class="badge badge-primary">{{ test['time_remaining'] }}</span>
+    <p>{{ test['body'] }}</p>
+{% endblock %}
