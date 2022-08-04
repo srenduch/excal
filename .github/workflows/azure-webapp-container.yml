@@ -62,11 +62,8 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           push: true
-          tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
+          tags: ghcr.io/srenduch/excal:latest
           file: ./Dockerfile
-          run: |
-            export CR_PAT=${{ secrets.EXCAL }}
-            echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
 
   deploy:
     permissions:
