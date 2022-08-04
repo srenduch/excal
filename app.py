@@ -1,9 +1,9 @@
-from imghdr import tests
 import sqlite3
 from datetime import datetime
-from time import sleep
 from os import urandom
 from flask import Flask, render_template, request, url_for, flash, redirect
+
+from src.handlers import *
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = urandom(12)
@@ -17,11 +17,13 @@ def jinja_globals() :
     tests = conn.execute('SELECT * FROM tests').fetchall()
 
     for assignment in assignments :
-        time_remaining = datetime.strptime(f"{assignment['date']} {assignment['time']}" , '%Y-%m-%d %H:%M') - datetime.now()
-        time_remaining = (datetime.min + time_remaining)
-        time_remaining = f"{time_remaining.day:02d}:{time_remaining.hour:02d}:{time_remaining.minute:02d}:{time_remaining.second:02d}"
-        conn.execute("UPDATE assignments SET time_remaining = ? WHERE id = ?", (time_remaining, assignment['id']))
+        time_remaining = calc_time_rem(f"{assignment['date']} {assignment['time']}")
+        if int(time_remaining.split(':')[0]) < 0 : 
+            conn.execute('DELETE FROM assignments WHERE id = ?', (assignment['id'],))
+        else :
+            conn.execute("UPDATE assignments SET time_remaining = ? WHERE id = ?", (time_remaining, assignment['id']))
 
+    conn.commit()
     conn.close()
 
     return {
@@ -84,9 +86,8 @@ def new() :
         date = request.form['date'] 
         time = request.form['time']
         notes = request.form['notes']
-        time_remaining = datetime.strptime(f"{request.form['date']} {request.form['time']}" , '%Y-%m-%d %H:%M') - datetime.now()
-        time_remaining = (datetime.min + time_remaining)
-        time_remaining = f"{time_remaining.day:02d}:{time_remaining.hour:02d}:{time_remaining.minute:02d}:{time_remaining.second:02d}"
+
+        time_remaining = calc_time_rem(f"{request.form['date']} {request.form['time']}")
 
         try :
             cls = request.form['sub']
@@ -112,8 +113,6 @@ def new() :
             flash(f'Item {cls}.{title} created', 'success')
             
             return redirect(url_for('new'))
-
-        print(request.form)
 
     today = datetime.now().strftime('%Y-%m-%d')
     return render_template('modify.html', today=today)
