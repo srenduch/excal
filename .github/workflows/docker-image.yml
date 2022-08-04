@@ -8,13 +8,28 @@ on:
 
 jobs:
 
-  build:
-
+  build-and-push-docker-image:
+    name: Build Docker iamge and push to repos
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: |
-        python db/init.py
-        docker build . --file Dockerfile --tag my-image-name:$(date +%s)
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to Github Packages
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_PAT }}
+          
+      - name: Build and push image to GCR
+        uses: docker/build-push-action@v2
+        with: 
+          context: .
+          tags: |
+          ghcr.io/srenduch/excal:latest
+        push: ${{ github.ref == 'refs/heads/main' }}
+
+      - name: Image digest
+        run: echo ${{ steps.docker_build.outputs.digest }}
