@@ -1,0 +1,1 @@
+yeah im kicking myself not using javascript but id rather suffer from flask's limitations before messing with ===

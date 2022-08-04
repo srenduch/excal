@@ -1,34 +1,30 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% if assignments %}
-        {% for assignment in assignments %}
-            <a href="{{ url_for('assignment', assign_id=assignment['id']) }}">            
-                <h2>{{ assignment['title'] }}</h2>
-            </a>
-            <h5>{{ assignment['item_type'] }}</h5>
-            <span class="badge badge-primary">{{ assignment['time_remaining'] }}</span>
+    {% if items %}
+        {% for item in items %}
+            <h3>{{ item['a_name'] }}</h3>
+            <div style="display: flex;">
+                <h5 style="
+                    color: {{ item['color']}};
+                ">{{ item['title'] }} </h5>  
+                <h5>&nbsp;|&nbsp;</h5>
+                <h5> {{ item['item_type'] }}</h5>
+            </div>
+            <span>{{ item['time_remaining'] }}</span>
             <hr>
         {% endfor %}
     {% endif %}
     
-    {% if classes %}
-        {% for cls in classes %}
-            <a href="{{ url_for('cls', class_id=cls['id']) }}">
-                <h2>{{ cls['title'] }}</h2>
-            </a>
-            <span class="badge badge-primary">{{ cls['time_remaining'] }}</span>
-            <hr>
-        {% endfor %}
-    {% endif %}
-
+    <!--  
     {% if tests %}
         {% for test in tests %}
             <a href="{{ url_for('test', test_id=test['id']) }}">
                 <h2>{{ test['title'] }}</h2>
             </a>
-            <span class="badge badge-primary">{{ test['time_remaining'] }}</span>
+            <span>{{ test['time_remaining'] }}</span>
             <hr>
         {% endfor %}
     {% endif %}
+    -->
 {% endblock %}
