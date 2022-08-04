@@ -64,6 +64,9 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.REPO }}:${{ github.sha }}
           file: ./Dockerfile
+          run: |
+            export CR_PAT=${{ github.token }}
+            echo $CR_PAT | docker login ghcr.io -u USERNAME --password-stdin
 
   deploy:
     permissions:
