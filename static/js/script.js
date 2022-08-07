@@ -16,7 +16,7 @@ function deleteAssignment(assignment_id, assignment_name) {
         success: function (data) {
             if (data == 'success') {
                 $('#deleteModal').modal('hide');
-                $('#assignement_' + assignment_id).remove();
+                $('#assignment_' + assignment_id).remove();
                 //let deleteAlert = $('#deleteAlert');
                 //deleteAlert.html('<strong>Success!</strong> The assignment ' + assignment_name + ' has been deleted.');
                 //deleteAlert.show();

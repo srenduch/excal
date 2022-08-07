@@ -111,7 +111,7 @@ def index() :
     query = "\
         SELECT classes.title, assignments.a_name, classes.color, \
             assignments.time_remaining, assignments.item_type, \
-            assignments.date, assignments.time\n \
+            assignments.date, assignments.time, assignments.id\n \
         FROM classes, assignments\n\
         WHERE classes.title = assignments.sub\n\
         "
