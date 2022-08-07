@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, url_for, flash, redirect
 from db import *
 from handlers import *
 
-app = Flask(__name__, template_folder='../templates')
+app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['SECRET_KEY'] = urandom(12)
 
 # Jinja-scope globals
