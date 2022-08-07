@@ -1,0 +1,26 @@
+#display-name {
+    margin-right: 20px;
+}
+
+#edit {
+    background: url(/static/assets/edit_icon.png) no-repeat;
+    align-self: center;
+    width: 30px;
+    height: 30px;
+    border: none;
+}
+
+.item {
+    border: 1px solid;
+    padding: 10px;
+    width: 25rem;
+    overflow-wrap: break-word;
+}
+
+.top {
+    justify-content: space-between;
+}
+
+.display-container {
+    display: flex;
+}

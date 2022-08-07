@@ -87,6 +87,7 @@ def new() :
             cls = request.form['sub']
         except :
             cls = 'Unfiled'
+            color = '#ffffff'
             conn = get_db_conn()
             conn.execute('INSERT INTO classes (title, color, item_type) \
                         VALUES (?, ?, ?)', \
@@ -116,10 +117,11 @@ def new() :
 def index() :
     conn = get_db_conn()
     query = "\
-        SELECT classes.title, assignments.a_name, classes.color, assignments.time_remaining, assignments.item_type\n\
+        SELECT classes.title, assignments.a_name, classes.color, \
+            assignments.time_remaining, assignments.item_type, \
+            assignments.date, assignments.time\n \
         FROM classes, assignments\n\
         WHERE classes.title = assignments.sub\n\
-        ORDER BY 1,2,3,4,5;\
         "
     items = conn.execute(query).fetchall()
     conn.close()
