@@ -2,8 +2,10 @@ from datetime import datetime
 from os import urandom
 from flask import Flask, render_template, request, url_for, flash, redirect
 
+
 from db import *
 from handlers import *
+
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['SECRET_KEY'] = urandom(12)
@@ -128,5 +130,23 @@ def index() :
 
     return render_template('index.html', items=items)
 
+# Delete
+@app.route('/delete', methods=['POST'])
+def delete() :
+    item_type = request.form['type']
+    item_id = request.form['id']
+    
+    if item_type == "assignment" :
+
+        conn = get_db_conn()
+        conn.execute('DELETE FROM assignments WHERE id = ?', (item_id,))
+        conn.commit()
+        conn.close()
+    
+
+    return "success"
+
 if __name__ == "__main__" :
+    app.jinja_env.auto_reload = True
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.run(debug=True)
