@@ -1,4 +1,4 @@
-$(document).on("click", ".close-btn", function() {
+$(document).on("click", ".item-btn", function () {
     var assignment_id = $(this).data("id");
     var assignment_name = $(this).data("name");
     $('#deleteButton').attr('onclick', 'deleteAssignment(' + assignment_id + ', "' + assignment_name + '")');
@@ -13,7 +13,7 @@ function deleteAssignment(assignment_id, assignment_name) {
             type: 'assignment',
             id: assignment_id
         },
-        success: function(data) {
+        success: function (data) {
             if (data == 'success') {
                 $('#deleteModal').modal('hide');
                 $('#assignement_' + assignment_id).remove();
@@ -25,7 +25,7 @@ function deleteAssignment(assignment_id, assignment_name) {
                 alert('Error');
             }
         },
-        error: function(data) {
+        error: function (data) {
             console.error(data);
         }
     });

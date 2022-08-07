@@ -2,8 +2,19 @@
     margin-right: 20px;
 }
 
+.popup {
+    background: white;
+}
+
 #edit {
     background: url(/static/assets/edit_icon.png) no-repeat;
+}
+
+#delete {
+    background: url(/static/assets/delete_icon.png) no-repeat;
+}
+
+.item-btn {
     align-self: center;
     width: 30px;
     height: 30px;

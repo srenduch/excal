@@ -1,12 +1,9 @@
 {% extends 'base.html' %}
 
-
-
 {% block content %}
     <!-- assignment deletion alert-->
     <!-- code has been commented out but left just in case cause bootstrap is a mess sometimes lol -->
     <div id="deleteAlert" class="alert alert-success collapse" role="alert">
-        
     </div>
 
     <!-- deletion confirmation modal -->
@@ -30,13 +27,15 @@
         </div>
     </div>
 
-
     {% if items %}
         {% for item in items %}
             <div class="item">
                 <div class="display-container top">
                     <h3>{{ item['a_name'] }}</h3>
-                    <button id="edit"></button>
+                    <div>
+                        <button class="item-btn" id="edit"></button>
+                        <button type="button" data-id="{{ item['id'] }}" data-name="{{ item['a_name'] }}" class="item-btn" data-toggle="modal" data-target="#deleteModal" id="delete"></button>
+                    </div>
                 </div>
                 <div class="display-container">
                     <h5 style="
@@ -46,9 +45,6 @@
                     <h5> {{ item['item_type'] }}</h5>
                 </div>
                 <span>Due in {{ item['time_remaining'] }} at {{ item['date'] }} {{ item['time'] }} </span>
-            </div>
-            <div data-id="{{ item['id'] }}" style="position: absolute; right: 0;">
-                <button type="button" data-id="{{ item['id'] }}" data-name="{{ item['a_name'] }}" class="close-btn btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete</button>
             </div>
         {% endfor %}
     {% endif %}

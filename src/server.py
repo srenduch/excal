@@ -2,7 +2,6 @@ from datetime import datetime
 from os import urandom
 from flask import Flask, render_template, request, url_for, flash, redirect
 
-
 from db import *
 from handlers import *
 
@@ -34,6 +33,10 @@ def jinja_globals() :
         'tests': tests,
     }
 
+@app.route('/background_process_test')
+def background_process_test() : 
+    pass
+
 def get_class(cls_title) :
     conn = get_db_conn()
     sub = conn.execute('SELECT * FROM classes WHERE title = ?', (cls_title,)).fetchone()
@@ -50,11 +53,6 @@ def assignment_page() :
 def cls_page() :
     return render_template('index.html', subdir='classes/')
 
-# Tests page
-# @app.route('/tests/')
-# def test_page() :
-#     return render_template('index.html', subdir='tests/')
-
 # Individual class items
 @app.route('/classes/<path:class_title>')
 def cls(class_title) :
@@ -62,14 +60,6 @@ def cls(class_title) :
     cls = conn.execute('SELECT * FROM classes WHERE id = ?', (class_title,)).fetchone()
     conn.close()
     return render_template('item.html', cls=cls)
-
-# # Individual test items
-# @app.route('/tests/<int:test_id>')
-# def test(test_id) :
-#     conn = get_db_conn()
-#     test = conn.execute('SELECT * FROM tests WHERE id = ?', (test_id,)).fetchone()
-#     conn.close()
-#     return render_template('item.html', test=test)
 
 # New
 @app.route('/new/', methods=['GET', 'POST'])
