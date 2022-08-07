@@ -1,11 +1,11 @@
-import sqlite3
 from datetime import datetime
 from os import urandom
 from flask import Flask, render_template, request, url_for, flash, redirect
 
-from src.handlers import *
+from db import *
+from handlers import *
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='../templates')
 app.config['SECRET_KEY'] = urandom(12)
 
 # Jinja-scope globals
@@ -37,12 +37,6 @@ def get_class(cls_title) :
     sub = conn.execute('SELECT * FROM classes WHERE title = ?', (cls_title,)).fetchone()
     conn.close()
     return sub
-
-# Initialize database
-def get_db_conn() :
-    conn = sqlite3.connect('db.db')
-    conn.row_factory = sqlite3.Row
-    return conn
 
 # Assignments page
 @app.route('/assignments/')
@@ -133,4 +127,4 @@ def index() :
     return render_template('index.html', items=items)
 
 if __name__ == "__main__" :
-    app.run(debug=True, host ='0.0.0.0')
+    app.run(debug=True)
