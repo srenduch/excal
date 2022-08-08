@@ -6,6 +6,197 @@
     <div id="deleteAlert" class="alert alert-success collapse" role="alert">
     </div>
 
+    <div class="modal" tabindex="-1" role="dialog" id="newModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <input id="new-title" class="new-input-full" type="text" name="name" value="{{ request.form['name'] }}"
+                    placeholder="Add a title" autocomplete="off"></input>
+                </div>
+                
+                <div class="modal-header" id="new-type-select">
+                    <button name="item-type" type="button" class="new-type-btn active" id="a-btn">Assignment</button>
+                    <button name="item-type" type="button" class="new-type-btn inactive" id="c-btn">Class</button>
+                    <button name="item-type" type="button" class="new-type-btn inactive" id="t-btn">Test</button>
+                </div>
+
+                <div class="modal-header assignment" id="new-date">
+                    <input id="new-date-input" type="date" name="date" value="{{ request.form['date'] }}"></input>
+                    <input type="time" name="time" value="23:59"></input>
+                </div>
+                
+                <div class="modal-header assignment" id="new-class-select">
+                    <select name="sub" class="edit-sub">
+                    </select>
+                </div>
+
+                <div class="modal-header assignment" id="new-content">
+                    <input class="new-input-full" autocomplete="off" type="text" name="content" placeholder="Add content">{{ request.form['content'] }}</input>
+                </div>
+
+                <div class="modal-header cls" id="new-class-color">
+                    <input  id="new-color" type="color" name="color"
+                    value="{{ request.form['color'] }}"></input>
+                </div>
+                <div class="modal-header" id="new-notes">
+                    <input id="notes" name="notes" autocomplete="off" class="new-input-full" type="text" name="notes" placeholder="Add notes">{{ request.form['notes'] }}</input>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" id="new-submit-btn">Submit</button>
+                </div>
+            </div>
+        </div>
+        <!--
+        <form method="post">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="label-for-new" for="title" style="
+                    width: 100px;
+                    ">Title</label>
+                <label class ="label-for-new" for="item_type" style="
+                    width: 200px;
+                ">Type</label>
+                <label class="label-for-new" for="color" style="
+                    width: 20px;
+                    ">Color</label>
+            </div>
+            
+            <div class="form-group">
+                <input type="text" name="name"
+                    value="{{ request.form['name'] }}"
+                    style="width: 100px;
+                    margin-right: 20px;
+                    border: 1px solid #6c757d;
+                    background: none;
+                    height: calc(1.5em + .75rem + 2px);
+                    padding: 0.375rem 0.75rem;
+                    font-size: 1rem;
+                    font-weight: 400;
+                    line-height: 1.5;
+                    color: #dee2e6;
+                    border-radius: 0.25rem;
+                    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+                    ">
+                </input>
+
+                <select name="item_type"
+                    style="
+                        width: 200px;
+                        margin-right: 20px;
+                        border: 1px solid #6c757d;
+                        background: none;
+                        height: calc(1.5em + .75rem + 2px);
+                        padding: 0.375rem 0.75rem;
+                        font-size: 1rem;
+                        font-weight: 400;
+                        line-height: 1.5;
+                        color: #dee2e6;
+                        border-radius: 0.25rem;
+                        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+                    ">
+                    <option value="Assignment" style="color: black;" {% if request.form['item_type'] == 'assignment' %}selected{% endif %}>Assignment</option>
+                    <option value="Class" style="color: black;" {% if request.form['item_type'] == 'class' %}selected{% endif %}>Class</option>
+                    <option value="Test" style="color: black;" {% if request.form['item_type'] == 'test' %}selected{% endif %}>Test</option>
+                </select>
+            
+                <input type="color" name="color"
+                    value="{{ request.form['color'] }}"
+                    style="
+                        width: 30px;
+                        background: none;
+                    ">
+                </input>
+            </div>
+
+            <div class="form-group">
+                <label for="content">Content</label>
+                <input type="text" name="content" class="form-control" autocomplete="off" style="
+                        width: 70%;
+                        background: none;">
+                        {{ request.form['content'] }}
+                </input>
+            </div>
+
+            <div class="form-group">
+                <label for="sub">Subject</label>
+                <select name="sub" class="form-control" style="
+                        width: 200px;
+                        margin-right: 20px;
+                        border: 1px solid #6c757d;
+                        background: none;
+                        height: calc(1.5em + .75rem + 2px);
+                        padding: 0.375rem 0.75rem;
+                        font-size: 1rem;
+                        font-weight: 400;
+                        line-height: 1.5;
+                        color: #dee2e6;
+                        border-radius: 0.25rem;
+                        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+                    ">
+                    {% for cls in classes %}
+                        <option value="{{ cls['title'] }}" style="color: black;" {% if request.form['sub'] == cls['title'] %}selected{% endif %}>{{ cls['title'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="date" style="width: 150px; margin-right: 5%;">Date</label>
+                <label for="time" syle="width: 150px; margin-right: 5%;">Time</label>
+            </div>
+
+            <div class="form-group">
+                <input type="date" id="start" name="date" value="{{ today }}" min="{{ today }}" style="
+                        background: none;
+                        border: 1px solid #6c757d;
+                        color: white;
+                        width: 150px;
+                        margin-right:5%;
+                        height: calc(1.5em + .75rem + 2px);
+                        padding: 0.375rem 0.75rem;
+                        font-size: 1rem;
+                        font-weight: 400;
+                        line-height: 1.5;
+                        color: #dee2e6;
+                        border-radius: 0.25rem;
+                        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+                        ">
+                
+                <input type="time" name="time" value="23:59"
+                        style="
+                        background: none;
+                        border: 1px solid #6c757d;
+                        color: white;
+                        width: 150px;
+                        margin-right:5%;
+                        height: calc(1.5em + .75rem + 2px);
+                        padding: 0.375rem 0.75rem;
+                        font-size: 1rem;
+                        font-weight: 400;
+                        line-height: 1.5;
+                        color: #dee2e6;
+                        border-radius: 0.25rem;
+                        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+                        ">{{ request.form['time'] }}
+                </input>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notes</label>
+                <input type="text" name="notes"
+                        class="form-control" style="
+                        width: 70%;
+                        background: none;">
+                        {{ request.form['notes'] }}
+                </input>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+        </form>
+          -->
+    </div>
+    
     <!-- deletion confirmation modal -->
     <div class="modal" tabindex="-1" role="dialog" id="deleteModal">
         <div class="modal-dialog" role="document">
@@ -28,6 +219,7 @@
     </div>
 
     {% if items %}
+    <div class="items">
         {% for item in items %}
             <div class="item" id="assignment_{{ item['id'] }}">
                 <div class="display-container top">
@@ -47,6 +239,7 @@
                 <span>Due in {{ item['time_remaining'] }} at {{ item['date'] }} {{ item['time'] }} </span>
             </div>
         {% endfor %}
+    </div>
     {% endif %}
     
     <!--  

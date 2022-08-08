@@ -2,8 +2,75 @@
     margin-right: 20px;
 }
 
-.popup {
-    background: white;
+.cls {
+    display: none;
+}
+
+.base-inactive {
+    filter: blur(1px);
+}
+
+#new-date {
+    justify-content: flex-start;
+}
+
+.edit-sub {
+    margin-right: 20px;
+    border: 1px solid #6c757d;
+    background: none;
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: #dee2e6;
+    border-radius: 0.25rem;
+}
+
+.new-type-btn {
+    border: none;
+    transition: all 0.5s
+}
+
+.inactive {
+    background: none;
+    color: white;
+}
+
+.inactive:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.active {
+    background: rgba(255, 255, 255, 0.1);
+    color: blanchedalmond;
+}
+
+.active:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#new-type-select {
+    display: flex;
+    justify-content: space-around;
+}
+
+.new-input-full {
+    width: 100%;
+    background: none;
+    border: none;
+    color: white;
+    height: 30px;
+    font-size: 20px;
+    padding-bottom: 0;
+}
+
+.new-input-full:focus {
+    outline-width: 0;
+}
+
+.content {
+    display: flex;
+    justify-content: space-between;
 }
 
 #edit {

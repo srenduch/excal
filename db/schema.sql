@@ -14,8 +14,9 @@ CREATE TABLE IF NOT EXISTS assignments (
 
 CREATE TABLE IF NOT EXISTS classes (
     title TEXT PRIMARY_KEY,
-    color TEXT,
-    item_type TEXT NOT NULL
+    color TEXT NOT NULL,
+    item_type TEXT NOT NULL,
+    notes TEXT
 );
 
 CREATE TABLE IF NOT EXISTS tests (

@@ -33,10 +33,6 @@ def jinja_globals() :
         'tests': tests,
     }
 
-@app.route('/background_process_test')
-def background_process_test() : 
-    pass
-
 def get_class(cls_title) :
     conn = get_db_conn()
     sub = conn.execute('SELECT * FROM classes WHERE title = ?', (cls_title,)).fetchone()
@@ -61,64 +57,36 @@ def cls(class_title) :
     conn.close()
     return render_template('item.html', cls=cls)
 
-# New
-@app.route('/new/', methods=['GET', 'POST'])
-def new() :
-    if request.method == 'POST' :
-        item_type = request.form['item_type']
-        title = request.form['name']
-        color = request.form['color']
-        content = request.form['content']
-        date = request.form['date'] 
-        time = request.form['time']
-        notes = request.form['notes']
-
-        time_remaining = calc_time_rem(f"{request.form['date']} {request.form['time']}")
-
-        try :
-            cls = request.form['sub']
-        except :
-            cls = 'Unfiled'
-            color = '#ffffff'
-            conn = get_db_conn()
-            conn.execute('INSERT INTO classes (title, color, item_type) \
-                        VALUES (?, ?, ?)', \
-                        ('Unfiled', color, 'Class'))
-            flash(f"No classes detected: {cls} created")
-            conn.commit()
-            conn.close()
-
-        if not (title) :
-            flash('Could not create item, title is empty', 'danger')
-        else :
-            conn = get_db_conn()
-            conn.execute("INSERT INTO assignments (sub, item_type, a_name, \
-                        content, date, time, notes, time_remaining) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", 
-                        (cls, item_type, title, content, date, time, notes, time_remaining))
-            conn.commit()
-            conn.close()
-            flash(f'Item {cls}.{title} created', 'success')
-            
-            return redirect(url_for('new'))
-
-    today = datetime.now().strftime('%Y-%m-%d')
-    return render_template('modify.html', today=today)
-
-# Homepage
-@app.route('/')
-def index() :
+@app.route('/get-classes', methods=['GET'])
+def get_classes() :
     conn = get_db_conn()
-    query = "\
-        SELECT classes.title, assignments.a_name, classes.color, \
-            assignments.time_remaining, assignments.item_type, \
-            assignments.date, assignments.time, assignments.id\n \
-        FROM classes, assignments\n\
-        WHERE classes.title = assignments.sub\n\
-        "
-    items = conn.execute(query).fetchall()
+    class_list = conn.execute('SELECT classes.title FROM classes').fetchall()
     conn.close()
 
-    return render_template('index.html', items=items)
+    html_str = ''
+    for cls in class_list :
+        html_str += f"<option style=\"color: black;\" value=\"{cls['title']}\">{cls['title']}</option>\n"
+    return html_str
+
+# New
+@app.route('/new-class', methods=['POST'])
+def new_class() :
+    title = request.form['title']
+    item_type = request.form['item_type']
+    color = request.form['color']
+    notes = request.form['notes']
+
+    if not title :
+        return 'title_error'
+
+    conn = get_db_conn()
+    conn.execute('INSERT INTO classes (title, color, item_type, notes) \
+                        VALUES (?, ?, ?, ?)', \
+                        (title, color, item_type, notes))
+    conn.commit()
+    conn.close()
+    
+    return 'success'
 
 # Delete
 @app.route('/delete', methods=['POST'])
@@ -135,6 +103,22 @@ def delete() :
     
 
     return "success"
+
+# Homepage
+@app.route('/')
+def index() :
+    conn = get_db_conn()
+    query = "\
+        SELECT classes.title, assignments.a_name, classes.color, \
+            assignments.time_remaining, assignments.item_type, \
+            assignments.date, assignments.time, assignments.id\n \
+        FROM classes, assignments\n\
+        WHERE classes.title = assignments.sub\n\
+        "
+    items = conn.execute(query).fetchall()
+    conn.close()
+
+    return render_template('index.html', items=items)
 
 if __name__ == "__main__" :
     app.jinja_env.auto_reload = True
