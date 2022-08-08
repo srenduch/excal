@@ -38,10 +38,9 @@ function deleteAssignment(assignment_id, assignment_name) {
     //$('.items').toggleClass('base-inactive'); // see above, causes bug when modal is closed
 }
 
-function DisplayAssignmentModal() {
+function displayNewModal() {
     $('.items').toggleClass('base-inactive')
     $('#newModal').fadeToggle();
-    AssignmentModalVisible = AssignmentModalVisible ? false : true;
     if (!$('#new-title').is('visible')) {
         setTimeout(function () {
             $('#new-title').focus();
@@ -65,22 +64,20 @@ function DisplayAssignmentModal() {
 
 $(document).on('keydown', document, async function (e) {
     if (e.key == 'n' && e.altKey) {
-        DisplayAssignmentModal();
+        displayNewModal();
     }
-
-    if (e.key == 'Escape') {
+    else if (e.key == 'Escape') {
         if ($('.items').hasClass('base-inactive')) {
             $('.items').removeClass('base-inactive')
             $('#newModal').fadeToggle();
         }
     }
-
 })
 
-const assignmentCreationModalBox = document.getElementById("assignmentCreationBox");
+const newModal = document.getElementById("newModalBox");
 
-$(document).on('click', '#newModal', function (e) {
-    const isClickInside = assignmentCreationModalBox.contains(e.target);
+$(document).on('click', '#newModalBox', function (e) {
+    const isClickInside = newModal.contains(e.target);
     if (!isClickInside) {
         $('.items').toggleClass('base-inactive')
         $('#newModal').fadeToggle();
