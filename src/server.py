@@ -131,8 +131,11 @@ def new_assignment() :
     date, time = date.split('T')
     time_remaining = calc_time_rem(f"{date} {time}")
 
-    if not(sub) or not(a_name) :
-        return 'error'
+    if not(sub):
+        return 'error sub'
+
+    if not(a_name):
+        return 'error a_name'
 
     conn = get_db_conn()
     conn.execute('INSERT INTO assignments (sub, item_type, a_name, content, date, time, time_remaining) VALUES (?, ?, ?, ?, ?, ?, ?)', (sub, item_type, a_name, content, date, time, time_remaining))
