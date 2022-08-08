@@ -60,18 +60,30 @@ def cls(class_title) :
 
 @app.route('/get-assignments', methods=['GET'])
 def get_assignments() :
-    conn = get_db_conn()
-    assignments_list = conn.execute("\
+    query = ''
+    if request.args.get('num_refresh') == '1' :
+        query = "\
+        SELECT assignments.id, assignments.a_name, assignments.sub \
+        , assignments.item_type, assignments.date, assignments.time, \
+        assignments.time_remaining, classes.color \
+        FROM assignments, classes \
+        WHERE classes.title = assignments.sub AND assignments.id=(SELECT max(id) FROM assignments) \
+        "
+    else :
+        query = " \
         SELECT assignments.id, assignments.a_name, assignments.sub \
         , assignments.item_type, assignments.date, assignments.time, \
         assignments.time_remaining, classes.color \
         FROM assignments, classes \
         WHERE classes.title = assignments.sub \
-        ").fetchall()
+        "
+    
+    conn = get_db_conn()
+    assignments_list = conn.execute(query).fetchall()
 
     html_str = ''
     for a in assignments_list :
-        html_str+=f'<div class="item" id="assignment_{a["id"]}">'
+        html_str+=f'<div class="item slide" id="assignment_{a["id"]}">'
         html_str += f'<div class="display-container top">'
         html_str += f'<h3>{a["a_name"]}</h3>'
         html_str += "<div>"
@@ -82,7 +94,7 @@ def get_assignments() :
         html_str += '<div class="display-container">'
         html_str += '<h5 style="'
         html_str += f'color: {a["color"]}";'
-        html_str += f'>{a["a_name"]} </h5>'
+        html_str += f'>{a["sub"]} </h5>'
         html_str += '<h5>&nbsp;|&nbsp;</h5>'
         html_str += f'<h5> {a["item_type"] }</h5>'
         html_str += '</div>'

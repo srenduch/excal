@@ -1,41 +1,68 @@
 $(window).on('load', function () {
-    $.ajax('/get-assignments').done(function (data) {
-        $('.items').html(data);
-    })
+    fetchAssignments(-1);
 })
 
-$(document).on("click", ".item-btn", function () {
-    var assignment_id = $(this).data("id");
-    var assignment_name = $(this).data("name");
-    //$('.items').toggleClass('base-inactive');  // causes bug when modal is closed cause it doesn't toggle back so the items are still blurred
-    $('#deleteButton').attr('onclick', 'deleteAssignment(' + assignment_id + ', "' + assignment_name + '")');
-})
-
-function deleteAssignment(assignment_id, assignment_name) {
+function fetchAssignments(num_refresh) {
     $.ajax({
-        url: '/delete',
-        type: 'POST',
+        url: '/get-assignments',
+        type: 'GET',
         data: {
-            type: 'assignment',
-            id: assignment_id
+            num_refresh: num_refresh,
         },
         success: function (data) {
-            if (data == 'success') {
-                $('#deleteModal').modal('hide');
-                $('#assignment_' + assignment_id).remove();
-                //let deleteAlert = $('#deleteAlert');
-                //deleteAlert.html('<strong>Success!</strong> The assignment ' + assignment_name + ' has been deleted.');
-                //deleteAlert.show();
-                //$('#deleteAlert').delay(2000).fadeOut(400);
-            } else {
-                alert('Error');
+            if (num_refresh == 1) {
+                $('.items').append(data);
             }
+            else {
+                $('.items').html(data);
+            }
+            setTimeout(function () {
+                slideElement($('.item'), 'right');
+            }, 100)
         },
         error: function (data) {
             console.error(data);
         }
     });
+}
+
+$(document).on("click", ".item-btn", function () {
+    var assignment_id = $(this).data("id");
+    var assignment_name = $(this).data("name");
+    $('#deleteButton').attr('onclick', function () {
+        $.ajax({
+            url: '/delete',
+            type: 'POST',
+            data: {
+                type: 'assignment',
+                id: assignment_id
+            },
+            success: function (data) {
+                if (data == 'success') {
+                    $('#deleteConfirmationModal').modal('hide');
+                    setTimeout(function () {
+                        slideElement($('#assignment_' + assignment_id), 'left');
+                    }, 100)
+                    setTimeout(function () {
+                        $('#assignment_' + assignment_id).remove();
+                    }, 500)
+                } else {
+                    alert('Error');
+                }
+            },
+            error: function (data) {
+                console.error(data);
+            }
+        });
+    });
+})
+
+function deleteAssignment(assignment_id, assignment_name) {
     //$('.items').toggleClass('base-inactive'); // see above, causes bug when modal is closed
+}
+
+function displayDeleteModal() {
+    $('.items').toggleClass('base-inactive');
 }
 
 function displayNewModal() {
@@ -66,6 +93,9 @@ $(document).on('keydown', document, async function (e) {
     if (e.key == 'n' && e.altKey) {
         displayNewModal();
     }
+    else if (e.key == 'd' && e.altKey) {
+        displayDeleteModal();
+    }
     else if (e.key == 'Escape') {
         if ($('.items').hasClass('base-inactive')) {
             $('.items').removeClass('base-inactive')
@@ -74,9 +104,8 @@ $(document).on('keydown', document, async function (e) {
     }
 })
 
-const newModal = document.getElementById("newModalBox");
-
 $(document).on('click', '#newModalBox', function (e) {
+    const newModal = document.getElementById("newModalBox");
     const isClickInside = newModal.contains(e.target);
     if (!isClickInside) {
         $('.items').toggleClass('base-inactive')
@@ -85,7 +114,7 @@ $(document).on('click', '#newModalBox', function (e) {
 });
 
 $(document).on('click', "#addButton", function () {
-    DisplayAssignmentModal();
+    displayNewModal();
 });
 
 $(document).on("click", "#new-submit-btn", function () {
@@ -127,6 +156,17 @@ function newClass() {
     });
 }
 
+function slideElement(element, direction) {
+    if (element.hasClass('slide')) {
+        if (direction == 'right') {
+            element.css('left', 0);
+        }
+        else if (direction == 'left') {
+            element.css('left', '-6rem');
+        }
+    }
+}
+
 function newAssignment() {
     let a_name = $('#new-title').val();
     let item_type = "Assignment";
@@ -144,13 +184,11 @@ function newAssignment() {
             sub: sub,
             date: date,
             content: content,
-            notes: notes
+            notes: notes,
         },
         success: function (data) {
             if (data == 'success') {
-                $.ajax('/get-assignments').done(function (data) {
-                    $('.items').html(data);
-                })
+                fetchAssignments(1);
                 $('#newModal').find('input:text').val('');
                 $('#newModal').find('textarea').val('');
             } else {

@@ -7,6 +7,12 @@
     color: #e99696;
 }
 
+.slide {
+    transition: all 1s;
+    left: -6rem;
+    position: relative
+}
+
 .cls {
     display: none;
 }
