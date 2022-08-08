@@ -25,6 +25,8 @@
 
                 <div class="modal-header assignment" id="new-date">
                     <input class="date-input" id="new-date-input" type="datetime-local" name="date" value="{{ request.form['date'] }}"></input>
+                    <img src="{{ url_for('static', filename='assets/calendar-solid-24.png') }}" alt="Calendar" class="img-fluid btnCalendar" id="btnCalendar">
+                    <div id="calendar" class="calendar"></div>
                 </div>
                 
                 <div class="modal-header assignment" id="new-class-select">

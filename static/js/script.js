@@ -73,6 +73,7 @@ $(document).on('keydown', document, async function (e) {
         if (AssignmentModalVisible) {
             $('.items').toggleClass('base-inactive')
             $('#newModal').fadeToggle();
+            AssignmentModalVisible = false;
         }
     }
 
@@ -80,13 +81,18 @@ $(document).on('keydown', document, async function (e) {
 
 const assignmentCreationModalBox = document.getElementById("assignmentCreationBox");
 
+/* bugged and too lazy to fix
+for some reason closes the window when you click on the greyed out days of the calendar
 $(document).on('click', '#newModal', function(e) {
     const isClickInside = assignmentCreationModalBox.contains(e.target);
+    console.log(isClickInside);
+    console.log(e.target);
     if (!isClickInside) {
         $('.items').toggleClass('base-inactive')
         $('#newModal').fadeToggle();
     }
 });
+*/
 
 $(document).on('click', "#addButton", function() {
     DisplayAssignmentModal();
@@ -198,4 +204,223 @@ $(document).on('click', '.new-type-btn', function() {
         $('.assignment').hide();
         $('.test').show();
     }
+});
+
+
+var calendarVisible = false;
+var month = new Date().getMonth();
+var year  = new Date().getFullYear();
+var day   = new Date().getDate();
+$(document).on('click', '#btnCalendar', function(e) {
+    // toggles calendar
+    let calendar = $('#calendar');
+    let calendarBtn = $('#btnCalendar');
+    let top = calendarBtn.offset().top + calendarBtn.height();
+    let left = calendarBtn.offset().left - 100;
+    calendarVisible = calendarVisible ? false : true;
+    calendar.css({
+        position: "fixed",
+        top: top,
+        left: left,
+        opacity: 0
+    });
+
+    
+
+    if (calendarVisible) {
+        calendar.animate({
+            opacity: 1
+        }, 500);       
+        calendar.css({
+            visibility: "visible"
+        });
+
+        let now = new Date();
+        month = (now.getMonth() + 1);
+        day = now.getDate();
+        year = now.getFullYear();
+
+        calendar.html(`<div class="calendar-header" id="calendar-header"></div>
+                        <div class="calendar-body" id="calendar-body"></div>`);
+
+        $('#calendar-header').html(`<div class="calendar-header-left">
+                                        <div class="calendar-header-month" id="calendar-header-month"></div>
+                                    </div>
+                                    <div class="calendar-header-right">
+                                        <img src="/static/assets/chevron-left-regular-24.png" class="calendar-header-left-arrow" id="calendar-header-left-arrow">
+                                        <img src="/static/assets/chevron-right-regular-24.png" class="calendar-header-right-arrow" id="calendar-header-right-arrow">
+                                    </div>`
+        );
+
+        $('#calendar-header-month').html(`${month}/${year}`);
+        $('#calendar-header-left-arrow').html('<i class="fas fa-chevron-left"></i>');
+        $('#calendar-header-right-arrow').html('<i class="fas fa-chevron-right"></i>');
+        
+        
+        setCalendar(month, year);
+    }
+    else {
+        calendar.css({
+            visibility: "hidden"
+        });
+    }
+
+});
+
+
+function setCalendar(month, year) {
+    let monthstring = '';
+    switch (month) {
+        case 1: 
+            monthstring = 'Jan';
+            break;
+        case 2:
+            monthstring = 'Feb';
+            break;
+        case 3:
+            monthstring = 'Mar';
+            break;
+        case 4:
+            monthstring = 'Apr';
+            break;
+        case 5:
+            monthstring = 'May';
+            break;
+        case 6:
+            monthstring = 'Jun';
+            break;
+        case 7:
+            monthstring = 'Jul';
+            break;
+        case 8:
+            monthstring = 'Aug';
+            break;
+        case 9:
+            monthstring = 'Sep';
+            break;
+        case 10:
+            monthstring = 'Oct';
+            break;
+        case 11:
+            monthstring = 'Nov';
+            break;
+        case 12:
+            monthstring = 'Dec';
+            break;
+    }
+    $('#calendar-header-month').html(monthstring + ' ' + year);
+    let days = getDaysInMonth(month, year);
+
+    $('#calendar-body').html(`  <div class="calendar-body-top-day">M</div>
+                                <div class="calendar-body-top-day">T</div>
+                                <div class="calendar-body-top-day">W</div>
+                                <div class="calendar-body-top-day">T</div>
+                                <div class="calendar-body-top-day">F</div>
+                                <div class="calendar-body-top-day">S</div>
+                                <div class="calendar-body-top-day">S</div>`
+    );
+
+    let firstDay = getFirstDayOfMonth(month, year);
+    firstDay = firstDay == 0 ? 7 : firstDay;
+    let lastMonthDaysNum = getDaysInMonth(month - 1, year);
+    for (let i = 0; i < firstDay - 1; i++) { 
+        $('#calendar-body').append(`<div class="calendar-body-day calendar-body-day-disabled before">${lastMonthDaysNum - firstDay + i + 2}</div>`);
+    }
+
+
+    
+
+    for (let i = 0; i < days; i++) {
+        $('#calendar-body').append(`<div class="calendar-body-day">${i + 1}</div>`);
+    }
+
+    let lastDay = getLastDayOfMonth(month, year);
+    lastDay = lastDay == 0 ? 7 : lastDay;
+    var i
+    for (i = 0; i < 7 - lastDay; i++) {
+        $('#calendar-body').append(`<div class="calendar-body-day calendar-body-day-disabled after">${i + 1}</div>`);
+    }
+
+    console.log(firstDay, lastDay, days);
+
+    // fill last row with days of the next month if necessary
+    if (firstDay-1 + days <= 35) {
+        for (let d = i; i < d+7; i++) {
+            $('#calendar-body').append(`<div class="calendar-body-day calendar-body-day-disabled after">${i + 1}</div>`);
+        }
+    }
+
+
+}
+
+$(document).on('click', ".calendar-body-day", function(e) {
+    if (!$(this).hasClass('calendar-body-day-disabled')) {
+        let day = $(this).text();
+        let hour = $('#new-date-input').val().split('T')[1].split(':')[0];
+        let minute = $('#new-date-input').val().split('T')[1].split(':')[1];
+        let monthformated = month < 10 ? '0' + month : month;
+        let dayformated = day < 10 ? '0' + day : day; 
+        $('#new-date-input').val(`${year}-${monthformated}-${dayformated}T${hour}:${minute}`);
+        $('#calendar').css({
+            visibility: "hidden"
+        });
+        calendarVisible = false;
+    }
+});
+
+$(document).on('click', ".before", function(e) {
+    if (month == 1) {
+        month = 12;
+        year--;
+    }
+    else {
+        month--;
+    }
+    setCalendar(month, year);
+});
+
+$(document).on('click', ".after", function(e) {
+    if (month == 12) {
+        month = 1;
+        year++;
+    }
+    else {
+        month++;
+    }
+    setCalendar(month, year);
+});
+
+
+function getDaysInMonth(month, year) {
+    return new Date(year, month, 0).getDate();
+}
+
+function getFirstDayOfMonth(month, year) {
+    return new Date(year, month - 1, 1).getDay();
+}
+
+function getLastDayOfMonth(month, year) {
+    return new Date(year, month, 0).getDay();
+}
+
+$(document).on('click', '#calendar-header-left-arrow', function() {
+    if (month == 1) {
+        month = 12;
+        year = year - 1;
+    }
+    else {
+        month = month - 1;
+    }
+    setCalendar(month, year);
+});
+
+$(document).on('click', '#calendar-header-right-arrow', function() {
+    if (month == 12) {
+        month = 1;
+        year = year + 1;
+    }
+    else {
+        month = month + 1;
+    }
+    setCalendar(month, year);
 });
