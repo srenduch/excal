@@ -21,8 +21,7 @@
                 </div>
 
                 <div class="modal-header assignment" id="new-date">
-                    <input id="new-date-input" type="date" name="date" value="{{ request.form['date'] }}"></input>
-                    <input type="time" name="time" value="23:59"></input>
+                    <input class="date-input" id="new-date-input" type="datetime-local" name="date" value="{{ request.form['date'] }}"></input>
                 </div>
                 
                 <div class="modal-header assignment" id="new-class-select">

@@ -51,7 +51,7 @@ $(document).bind('keypress', 'show-new-form', async function (e) {
             month = "0" + month;
         if (day < 10)
             day = "0" + day;
-        var today = now.getFullYear() + '-' + month + '-' + day;
+        var today = now.getFullYear() + '-' + month + '-' + day + ' 23:59';
         $('#new-date-input').val(today)
 
         $.ajax('/get-classes').done(function (data) {
