@@ -155,8 +155,18 @@ function newAssignment() {
                     $('.items').html(data);
                 })
                 $('#newModal').find('input:text').val('');
-            } else {
-                alert('Error');
+            } 
+            else if (data == 'error sub'){
+                alert('Error, please create a class first');
+                console.error(data);
+            }
+            else if (data == 'error a_name') {
+                alert('Error, please enter a name for the assignment');
+                console.error(data);
+            }
+            else {
+                alert('Unknown error');
+                console.error(data);
             }
         },
         error: function (data) {
@@ -165,7 +175,7 @@ function newAssignment() {
     });
 }
 
-$('.new-type-btn').click(function () {
+$(document).on('click', '.new-type-btn', function() {
     $('.new-type-btn').removeClass('active').addClass('inactive');
     $(this).removeClass('inactive').addClass('active');
 
