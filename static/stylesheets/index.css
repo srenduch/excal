@@ -128,10 +128,29 @@
     overflow-wrap: break-word;
 }
 
+/* mobile */
+@media (max-width: 768px) { 
+    .item {
+        flex-shrink: 1;
+        flex-grow: 1;
+        padding-right: 20px;
+        width: auto;
+    }
+}
+
 .top {
     justify-content: space-between;
 }
 
 .display-container {
     display: flex;
+}
+
+.Add {
+    width: 72px;
+    height: 72px;
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    cursor: pointer;
 }

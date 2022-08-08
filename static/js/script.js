@@ -7,7 +7,7 @@ $(window).on('load', function () {
 $(document).on("click", ".item-btn", function () {
     var assignment_id = $(this).data("id");
     var assignment_name = $(this).data("name");
-    $('.items').toggleClass('base-inactive');
+    //$('.items').toggleClass('base-inactive');  // causes bug when modal is closed cause it doesn't toggle back so the items are still blurred
     $('#deleteButton').attr('onclick', 'deleteAssignment(' + assignment_id + ', "' + assignment_name + '")');
 })
 
@@ -35,34 +35,62 @@ function deleteAssignment(assignment_id, assignment_name) {
             console.error(data);
         }
     });
-    $('.items').toggleClass('base-inactive');
+    //$('.items').toggleClass('base-inactive'); // see above, causes bug when modal is closed
 }
 
-$(document).bind('keydown', 'show-new-form', async function (e) {
+function DisplayAssignmentModal() {
+    $('.items').toggleClass('base-inactive')
+    $('#newModal').fadeToggle();
+    AssignmentModalVisible = AssignmentModalVisible ? false : true;
+    if (!$('#new-title').is('visible')) {
+        setTimeout(function () {
+            $('#new-title').focus();
+        }, 500);
+    }
+
+    var now = new Date();
+    var month = (now.getMonth() + 1);
+    var day = now.getDate();
+    if (month < 10)
+        month = "0" + month;
+    if (day < 10)
+        day = "0" + day;
+    var today = now.getFullYear() + '-' + month + '-' + day + ' 23:59';
+    $('#new-date-input').val(today)
+
+    $.ajax('/get-classes').done(function (data) {
+        $('.edit-sub').html(data);
+    })
+}
+
+var AssignmentModalVisible = false;
+$(document).on('keydown', document, async function (e) {
     if (e.key == 'n' && e.altKey) {
+        DisplayAssignmentModal();
+    }
+
+    if (e.key == 'Escape') {
+        if (AssignmentModalVisible) {
+            $('.items').toggleClass('base-inactive')
+            $('#newModal').fadeToggle();
+        }
+    }
+
+})
+
+const assignmentCreationModalBox = document.getElementById("assignmentCreationBox");
+
+$(document).on('click', '#newModal', function(e) {
+    const isClickInside = assignmentCreationModalBox.contains(e.target);
+    if (!isClickInside) {
         $('.items').toggleClass('base-inactive')
         $('#newModal').fadeToggle();
-        if (!$('#new-title').is('visible')) {
-            setTimeout(function () {
-                $('#new-title').focus();
-            }, 500);
-        }
-
-        var now = new Date();
-        var month = (now.getMonth() + 1);
-        var day = now.getDate();
-        if (month < 10)
-            month = "0" + month;
-        if (day < 10)
-            day = "0" + day;
-        var today = now.getFullYear() + '-' + month + '-' + day + ' 23:59';
-        $('#new-date-input').val(today)
-
-        $.ajax('/get-classes').done(function (data) {
-            $('.edit-sub').html(data);
-        })
     }
-})
+});
+
+$(document).on('click', "#addButton", function() {
+    DisplayAssignmentModal();
+});
 
 $(document).on("click", "#new-submit-btn", function () {
     if ($('#c-btn').hasClass('active')) {

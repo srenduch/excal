@@ -1,14 +1,17 @@
 {% extends 'base.html' %}
 
+
 {% block content %}
+    <img src="{{ url_for('static', filename='assets/message-square-add-solid-72.png') }}" alt="Add" class="img-fluid Add" id="addButton">
     <!-- assignment deletion alert-->
     <!-- code has been commented out but left just in case cause bootstrap is a mess sometimes lol -->
     <div id="deleteAlert" class="alert alert-success collapse" role="alert">
     </div>
 
-    <div class="modal" tabindex="-1" role="dialog" id="newModal">
+    <!-- assignment creation modal -->
+    <div class="modal" tabindex="-1" role="dialog" id="newModal" data-backdrop="static">
         <div class="modal-dialog" role="document">
-            <div class="modal-content">
+            <div class="modal-content" id="assignmentCreationBox">
                 <div class="modal-header">
                     <input id="new-title" class="new-input-full" type="text" name="name" value="{{ request.form['name'] }}"
                     placeholder="Add a title" autocomplete="off"></input>
