@@ -63,15 +63,14 @@ function DisplayAssignmentModal() {
     })
 }
 
-var AssignmentModalVisible = false;
 $(document).on('keydown', document, async function (e) {
     if (e.key == 'n' && e.altKey) {
         DisplayAssignmentModal();
     }
 
     if (e.key == 'Escape') {
-        if (AssignmentModalVisible) {
-            $('.items').toggleClass('base-inactive')
+        if ($('.items').hasClass('base-inactive')) {
+            $('.items').removeClass('base-inactive')
             $('#newModal').fadeToggle();
         }
     }
@@ -80,7 +79,7 @@ $(document).on('keydown', document, async function (e) {
 
 const assignmentCreationModalBox = document.getElementById("assignmentCreationBox");
 
-$(document).on('click', '#newModal', function(e) {
+$(document).on('click', '#newModal', function (e) {
     const isClickInside = assignmentCreationModalBox.contains(e.target);
     if (!isClickInside) {
         $('.items').toggleClass('base-inactive')
@@ -88,7 +87,7 @@ $(document).on('click', '#newModal', function(e) {
     }
 });
 
-$(document).on('click', "#addButton", function() {
+$(document).on('click', "#addButton", function () {
     DisplayAssignmentModal();
 });
 
