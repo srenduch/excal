@@ -75,6 +75,15 @@
     justify-content: space-around;
 }
 
+.textarea-holder {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+#new-title {
+    font-size: 20px;
+}
+
 .new-input-full {
     width: 100%;
     background: none;
@@ -83,6 +92,9 @@
     height: 30px;
     font-size: 20px;
     padding-bottom: 0;
+    overflow: hidden;
+    resize: none;
+    font-size: 0.9rem;
 }
 
 .new-input-full:focus {

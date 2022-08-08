@@ -92,6 +92,7 @@ function newClass() {
             if (data == 'success') {
                 $('#newModal').modal('hide');
                 $('#newModal').find('input:text').val('');
+                $('#newModal').find('textarea').val('');
             } else {
                 alert('Error');
             }
@@ -127,6 +128,7 @@ function newAssignment() {
                     $('.items').html(data);
                 })
                 $('#newModal').find('input:text').val('');
+                $('#newModal').find('textarea').val('');
             } else {
                 alert('Error');
             }
