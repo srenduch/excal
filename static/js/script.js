@@ -1,3 +1,9 @@
+$(window).on('load', function () {
+    $.ajax('/get-assignments').done(function (data) {
+        $('.items').html(data);
+    })
+})
+
 $(document).on("click", ".item-btn", function () {
     var assignment_id = $(this).data("id");
     var assignment_name = $(this).data("name");
@@ -32,16 +38,14 @@ function deleteAssignment(assignment_id, assignment_name) {
     $('.items').toggleClass('base-inactive');
 }
 
-$(document).bind('keypress', 'show-new-form', async function (e) {
-    if (e.key == 'N') {
-        if (!$('#new-title').is(':focus')) {
-            $('.items').toggleClass('base-inactive')
-            $('#newModal').fadeToggle();
-            if (!$('#new-title').is('visible')) {
-                setTimeout(function () {
-                    $('#new-title').focus();
-                }, 500);
-            }
+$(document).bind('keydown', 'show-new-form', async function (e) {
+    if (e.key == 'n' && e.altKey) {
+        $('.items').toggleClass('base-inactive')
+        $('#newModal').fadeToggle();
+        if (!$('#new-title').is('visible')) {
+            setTimeout(function () {
+                $('#new-title').focus();
+            }, 500);
         }
 
         var now = new Date();
@@ -64,11 +68,14 @@ $(document).on("click", "#new-submit-btn", function () {
     if ($('#c-btn').hasClass('active')) {
         newClass();
     }
+    else if ($('#a-btn').hasClass('active')) {
+        newAssignment();
+    }
 })
 
 function newClass() {
     let title = $('#new-title').val();
-    let item_type = "\"Class\"";
+    let item_type = "Class";
     let color = $('#new-color').val();
     let notes = $('#notes').val();
 
@@ -84,6 +91,7 @@ function newClass() {
         success: function (data) {
             if (data == 'success') {
                 $('#newModal').modal('hide');
+                $('#newModal').find('input:text').val('');
             } else {
                 alert('Error');
             }
@@ -92,8 +100,41 @@ function newClass() {
             console.error(data);
         }
     });
+}
 
-    $('#newModal').find('input:text').val('');
+function newAssignment() {
+    let a_name = $('#new-title').val();
+    let item_type = "Assignment";
+    let sub = $('.edit-sub').val();
+    let date = $('.date-input').val();
+    let content = $('#assignment-content').val();
+    let notes = $('#notes').val();
+
+    $.ajax({
+        url: '/new-assignment',
+        type: 'POST',
+        data: {
+            a_name: a_name,
+            item_type: item_type,
+            sub: sub,
+            date: date,
+            content: content,
+            notes: notes
+        },
+        success: function (data) {
+            if (data == 'success') {
+                $.ajax('/get-assignments').done(function (data) {
+                    $('.items').html(data);
+                })
+                $('#newModal').find('input:text').val('');
+            } else {
+                alert('Error');
+            }
+        },
+        error: function (data) {
+            console.error(data);
+        }
+    });
 }
 
 $('.new-type-btn').click(function () {

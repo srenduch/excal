@@ -2,6 +2,11 @@
     margin-right: 20px;
 }
 
+.urgent {
+    font-weight: bold;
+    color: #e99696;
+}
+
 .cls {
     display: none;
 }

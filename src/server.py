@@ -1,3 +1,4 @@
+from cgitb import html
 from datetime import datetime
 from os import urandom
 from flask import Flask, render_template, request, url_for, flash, redirect
@@ -19,7 +20,7 @@ def jinja_globals() :
 
     for assignment in assignments :
         time_remaining = calc_time_rem(f"{assignment['date']} {assignment['time']}")
-        if int(time_remaining.split(':')[0]) < 0 : 
+        if int(time_remaining.split(':')[0]) : 
             conn.execute('DELETE FROM assignments WHERE id = ?', (assignment['id'],))
         else :
             conn.execute("UPDATE assignments SET time_remaining = ? WHERE id = ?", (time_remaining, assignment['id']))
@@ -57,10 +58,49 @@ def cls(class_title) :
     conn.close()
     return render_template('item.html', cls=cls)
 
+@app.route('/get-assignments', methods=['GET'])
+def get_assignments() :
+    conn = get_db_conn()
+    assignments_list = conn.execute("\
+        SELECT assignments.id, assignments.a_name, assignments.sub \
+        , assignments.item_type, assignments.date, assignments.time, \
+        assignments.time_remaining, classes.color \
+        FROM assignments, classes \
+        WHERE classes.title = assignments.sub \
+        ").fetchall()
+
+    html_str = ''
+    for a in assignments_list :
+        html_str+=f'<div class="item" id="assignment_{a["id"]}">'
+        html_str += f'<div class="display-container top">'
+        html_str += f'<h3>{a["a_name"]}</h3>'
+        html_str += "<div>"
+        html_str += '<button class="item-btn" id="edit"></button>'
+        html_str += f'<button type="button" data-id="{a["id"]}" data-name="{a["a_name"]}" class="item-btn" data-toggle="modal" data-target="#deleteModal" id="delete"></button>'
+        html_str += "</div>"
+        html_str += "</div>"
+        html_str += '<div class="display-container">'
+        html_str += '<h5 style="'
+        html_str += f'color: {a["color"]}";'
+        html_str += f'>{a["a_name"]} </h5>'
+        html_str += '<h5>&nbsp;|&nbsp;</h5>'
+        html_str += f'<h5> {a["item_type"] }</h5>'
+        html_str += '</div>'
+        html_str += f'<span>Due in </span>'
+        if int(a['time_remaining'].split(':')[0]) <= 2 :
+            html_str += f'<span class="urgent">{a["time_remaining"]} </span>'
+        else :
+            html_str += f'<span>{a["time_remaining"]} </span>'
+        html_str += f'at {a["date"] } {a["time"]}</span>'
+        html_str += '</div>'
+
+    return html_str
+
+
 @app.route('/get-classes', methods=['GET'])
 def get_classes() :
     conn = get_db_conn()
-    class_list = conn.execute('SELECT classes.title FROM classes').fetchall()
+    class_list = conn.execute('SELECT title FROM classes').fetchall()
     conn.close()
 
     html_str = ''
@@ -68,7 +108,28 @@ def get_classes() :
         html_str += f"<option style=\"color: black;\" value=\"{cls['title']}\">{cls['title']}</option>\n"
     return html_str
 
-# New
+# New assignment
+@app.route('/new-assignment', methods=['POST'])
+def new_assignment() :
+    sub = request.form['sub']
+    item_type = request.form['item_type']
+    a_name = request.form['a_name']
+    content = request.form['content']
+    date = request.form['date']
+    date, time = date.split('T')
+    time_remaining = calc_time_rem(f"{date} {time}")
+
+    if not(sub) or not(a_name) :
+        return 'error'
+
+    conn = get_db_conn()
+    conn.execute('INSERT INTO assignments (sub, item_type, a_name, content, date, time, time_remaining) VALUES (?, ?, ?, ?, ?, ?, ?)', (sub, item_type, a_name, content, date, time, time_remaining))
+    conn.commit()
+    conn.close()
+    
+    return 'success'
+
+# New class
 @app.route('/new-class', methods=['POST'])
 def new_class() :
     title = request.form['title']
@@ -101,24 +162,12 @@ def delete() :
         conn.commit()
         conn.close()
     
-
     return "success"
 
 # Homepage
 @app.route('/')
 def index() :
-    conn = get_db_conn()
-    query = "\
-        SELECT classes.title, assignments.a_name, classes.color, \
-            assignments.time_remaining, assignments.item_type, \
-            assignments.date, assignments.time, assignments.id\n \
-        FROM classes, assignments\n\
-        WHERE classes.title = assignments.sub\n\
-        "
-    items = conn.execute(query).fetchall()
-    conn.close()
-
-    return render_template('index.html', items=items)
+    return render_template('index.html')
 
 if __name__ == "__main__" :
     app.jinja_env.auto_reload = True
