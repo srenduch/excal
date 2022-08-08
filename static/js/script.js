@@ -102,6 +102,11 @@ $(document).on('keydown', document, async function (e) {
             $('#newModal').fadeToggle();
         }
     }
+    else if (e.key == 'Enter') {
+        if ($('#a-btn').hasClass('active')) {
+            newAssignment();
+        }
+    }
 })
 
 $(document).on('click', '#newModalBox', function (e) {
