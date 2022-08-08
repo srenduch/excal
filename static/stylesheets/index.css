@@ -7,6 +7,12 @@
     color: #e99696;
 }
 
+.slide {
+    transition: all 1s;
+    left: -6rem;
+    position: relative
+}
+
 .cls {
     display: none;
 }
@@ -75,6 +81,15 @@
     justify-content: space-around;
 }
 
+.textarea-holder {
+    padding-top: 0.25rem;
+    padding-bottom: 0.25rem;
+}
+
+#new-title {
+    font-size: 20px;
+}
+
 .new-input-full {
     width: 100%;
     background: none;
@@ -83,6 +98,9 @@
     height: 30px;
     font-size: 20px;
     padding-bottom: 0;
+    overflow: hidden;
+    resize: none;
+    font-size: 0.9rem;
 }
 
 .new-input-full:focus {
@@ -117,7 +135,7 @@
 }
 
 /* mobile */
-@media (max-width: 768px) { 
+@media (max-width: 768px) {
     .item {
         flex-shrink: 1;
         flex-grow: 1;
@@ -135,11 +153,11 @@
 }
 
 .Add {
-    width: 72px;
-    height: 72px;
+    width: 3.5rem;
+    height: 3.5rem;
     position: fixed;
-    bottom: 20px;
-    left: 20px;
+    bottom: 1rem;
+    left: 1rem;
     cursor: pointer;
 }
 
