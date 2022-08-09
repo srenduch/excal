@@ -1,34 +1,115 @@
 {% extends 'base.html' %}
 
-{% block content %}
-    {% if assignments %}
-        {% for assignment in assignments %}
-            <a href="{{ url_for('assignment', assign_id=assignment['id']) }}">            
-                <h2>{{ assignment['title'] }}</h2>
-            </a>
-            <h5>{{ assignment['item_type'] }}</h5>
-            <span class="badge badge-primary">{{ assignment['time_remaining'] }}</span>
-            <hr>
-        {% endfor %}
-    {% endif %}
-    
-    {% if classes %}
-        {% for cls in classes %}
-            <a href="{{ url_for('cls', class_id=cls['id']) }}">
-                <h2>{{ cls['title'] }}</h2>
-            </a>
-            <span class="badge badge-primary">{{ cls['time_remaining'] }}</span>
-            <hr>
-        {% endfor %}
-    {% endif %}
 
+{% block content %}
+    <img src="{{ url_for('static', filename='assets/message-square-add-solid-72.png') }}" alt="Add" class="img-fluid Add" id="addButton">
+    <!-- assignment deletion alert-->
+    <!-- code has been commented out but left just in case cause bootstrap is a mess sometimes lol -->
+    <div id="deleteAlert" class="alert alert-success collapse" role="alert">
+    </div>
+
+    <!-- assignment creation modal -->
+    <div class="modal" tabindex="-1" role="dialog" id="newModal" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" id="newModalBox">
+                <div class="modal-header">
+                    <input id="new-title" class="new-input-full" type="text" name="name" value="{{ request.form['name'] }}"
+                    placeholder="Add a title" autocomplete="off"></input>
+                </div>
+                
+                <div class="modal-header" id="new-type-select">
+                    <button name="item-type" type="button" class="new-type-btn active" id="a-btn">Assignment</button>
+                    <button name="item-type" type="button" class="new-type-btn inactive" id="c-btn">Class</button>
+                    <button name="item-type" type="button" class="new-type-btn inactive" id="t-btn">Test</button>
+                </div>
+
+                <div class="modal-header assignment" id="new-date">
+                    <div class="new-assignment-static">
+                        <div id="btnCalendar">
+                        <input class="date-input" id="new-date-input" type="datetime-local" name="date" value="{{ request.form['date'] }}"></input>
+                            </div>
+                    </div>
+                    <div id="calendar" class="calendar calendar-hidden">
+                        <div class="calendar-header" id="calendar-header">
+                            <div class="calendar-header-left">
+                                <div class="calendar-header-month" id="calendar-header-month"></div>
+                            </div>
+                            <div class="calendar-header-right">
+                                <img src="/static/assets/chevron-left-regular-24.png" class="calendar-header-left-arrow" id="calendar-header-left-arrow">
+                                <i class="fas fa-chevron-left"></i>
+                                </img>
+                                <img src="/static/assets/chevron-right-regular-24.png" class="calendar-header-right-arrow" id="calendar-header-right-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                                </img>
+                            </div>
+                        </div>
+                        <div class="calendar-body" id="calendar-body">
+                            <div class="calendar-body-top-day">M</div>
+                            <div class="calendar-body-top-day">T</div>
+                            <div class="calendar-body-top-day">W</div>
+                            <div class="calendar-body-top-day">T</div>
+                            <div class="calendar-body-top-day">F</div>
+                            <div class="calendar-body-top-day">S</div>
+                            <div class="calendar-body-top-day">S</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="modal-header assignment" id="new-class-select">
+                    <select name="sub" class="edit-sub">
+                    </select>
+                </div>
+
+                <div class="modal-header assignment textarea-holder" id="new-content">
+                    <textarea id="assignment-content" class="new-input-full" autocomplete="off" placeholder="Add content"></textarea>
+                </div>
+
+                <div class="modal-header cls" id="new-class-color">
+                    <input type="color" id="new-color" value="#ffffff" />
+                </div>
+                <div class="modal-header textarea-holder" id="new-notes">
+                    <textarea id="notes" autocomplete="off" class="new-input-full" name="notes" placeholder="Add notes"></textarea>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" id="new-submit-btn">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- deletion confirmation modal -->
+    <div class="modal" tabindex="-1" role="dialog" id="deleteConfirmationModal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to delete this?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="deleteButton">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="items">
+    </div>
+    <!--  
     {% if tests %}
         {% for test in tests %}
             <a href="{{ url_for('test', test_id=test['id']) }}">
                 <h2>{{ test['title'] }}</h2>
             </a>
-            <span class="badge badge-primary">{{ test['time_remaining'] }}</span>
+            <span>{{ test['time_remaining'] }}</span>
             <hr>
         {% endfor %}
     {% endif %}
+    -->
 {% endblock %}
