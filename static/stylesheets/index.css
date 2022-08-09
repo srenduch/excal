@@ -135,6 +135,19 @@
     overflow-wrap: break-word;
 }
 
+#new-color {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    box-shadow: 0px 3px 6px #0000001A;
+    transform: scale(1.5);
+}
+
+input::-webkit-color-swatch {
+    border: none;
+}
+
 /* mobile */
 @media (max-width: 768px) {
     .item {

@@ -61,15 +61,14 @@
                 </div>
 
                 <div class="modal-header assignment textarea-holder" id="new-content">
-                    <textarea id="assignment-content" class="new-input-full" autocomplete="off" placeholder="Add content"> {{ request.form['content'] }}</textarea>
+                    <textarea id="assignment-content" class="new-input-full" autocomplete="off" placeholder="Add content"></textarea>
                 </div>
 
                 <div class="modal-header cls" id="new-class-color">
-                    <input  id="new-color" type="color" name="color"
-                    value="{{ request.form['color'] }}"></input>
+                    <input type="color" id="new-color" value="#ffffff" />
                 </div>
                 <div class="modal-header textarea-holder" id="new-notes">
-                    <textarea id="notes" autocomplete="off" class="new-input-full" name="notes" placeholder="Add notes">{{ request.form['notes'] }}</textarea>
+                    <textarea id="notes" autocomplete="off" class="new-input-full" name="notes" placeholder="Add notes"></textarea>
                 </div>
 
                 <div class="modal-footer">
