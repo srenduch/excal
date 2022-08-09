@@ -24,9 +24,35 @@
                 </div>
 
                 <div class="modal-header assignment" id="new-date">
-                    <input class="date-input" id="new-date-input" type="datetime-local" name="date" value="{{ request.form['date'] }}"></input>
-                    <img src="{{ url_for('static', filename='assets/calendar-solid-24.png') }}" alt="Calendar" class="img-fluid btnCalendar" id="btnCalendar">
-                    <div id="calendar" class="calendar"></div>
+                    <div class="new-assignment-static">
+                        <div id="btnCalendar">
+                        <input class="date-input" id="new-date-input" type="datetime-local" name="date" value="{{ request.form['date'] }}"></input>
+                            </div>
+                    </div>
+                    <div id="calendar" class="calendar calendar-hidden">
+                        <div class="calendar-header" id="calendar-header">
+                            <div class="calendar-header-left">
+                                <div class="calendar-header-month" id="calendar-header-month"></div>
+                            </div>
+                            <div class="calendar-header-right">
+                                <img src="/static/assets/chevron-left-regular-24.png" class="calendar-header-left-arrow" id="calendar-header-left-arrow">
+                                <i class="fas fa-chevron-left"></i>
+                                </img>
+                                <img src="/static/assets/chevron-right-regular-24.png" class="calendar-header-right-arrow" id="calendar-header-right-arrow">
+                                <i class="fas fa-chevron-right"></i>
+                                </img>
+                            </div>
+                        </div>
+                        <div class="calendar-body" id="calendar-body">
+                            <div class="calendar-body-top-day">M</div>
+                            <div class="calendar-body-top-day">T</div>
+                            <div class="calendar-body-top-day">W</div>
+                            <div class="calendar-body-top-day">T</div>
+                            <div class="calendar-body-top-day">F</div>
+                            <div class="calendar-body-top-day">S</div>
+                            <div class="calendar-body-top-day">S</div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div class="modal-header assignment" id="new-class-select">

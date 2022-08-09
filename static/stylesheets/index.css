@@ -7,8 +7,13 @@
     color: #e99696;
 }
 
+#new-date {
+    display: flex;
+    flex-direction: column;
+}
+
 .slide {
-    transition: all 1s;
+    transition: all 0.3s;
     left: -6rem;
     position: relative
 }
@@ -19,10 +24,6 @@
 
 .base-inactive {
     filter: blur(1px);
-}
-
-#new-date {
-    justify-content: flex-start;
 }
 
 .date-input {
@@ -144,6 +145,10 @@
     }
 }
 
+#newModalBox {
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.8);
+}
+
 .top {
     justify-content: space-between;
 }
@@ -170,20 +175,26 @@
     border-radius: 70%;
 }
 
+.calendar-hidden {
+    visibility: hidden !important;
+}
+
 .calendar {
-    position: fixed;
-    top: 0;
-    left: 0;
+    opacity: 1;
+    position: absolute;
+    bottom: 0;
     width: 200px;
     height: 250px;
+    top: 45%;
     background-color: #090b0c;
     z-index: 1;
     justify-content: center;
     align-items: center;
-    visibility: hidden;
+    visibility: visible;
     border: 1px solid #6c757d;
     flex-flow: column;
     align-items: baseline;
+    box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.15);
 }
 
 .calendar-header {
@@ -288,5 +299,3 @@
     background-color: #090b0c;
     color: #a2a4a7;
 }
-
-

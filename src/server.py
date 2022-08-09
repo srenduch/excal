@@ -1,4 +1,3 @@
-from cgitb import html
 from datetime import datetime
 from os import urandom
 from flask import Flask, render_template, request, url_for, flash, redirect
