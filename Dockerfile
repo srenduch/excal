@@ -8,4 +8,3 @@ RUN pip install pipreqs
 RUN pipreqs --force --encoding=utf-8 . >> requirements.txt && echo -e "gunicorn" >> requirements.txt
 RUN pip install -r requirements.txt
 RUN python db/init.py
-RUN gunicorn --chdir src/ app:app
