@@ -8,6 +8,7 @@ function fetchAssignments(num_refresh) {
         type: 'GET',
         data: {
             num_refresh: num_refresh,
+            user_id: localStorage['user_id']
         },
         success: function (data) {
             if (num_refresh == 1) {
@@ -80,7 +81,23 @@ $(document).ready(function() {
 });
 
 $('#newModal').on('show.bs.modal' , function () {
-    $('.items').addClass('base-inactive')
+    $('.items').addClass('base-inactive');
+    if (!classes_cached) {
+        $.ajax({
+            url: '/get-classes',
+            type: 'GET',
+            data: {
+                user_id: localStorage['user_id']
+            },
+            success: function (data) {
+                localStorage['classes'] = data;
+                $('#class-select').html(localStorage['classes']);
+            }
+        });
+        classes_cached = true;
+    }
+    else
+        $('#class-select').html(localStorage['classes']);
 });
 
 $('#newModal').on('hidden.bs.modal', function () {
@@ -106,18 +123,27 @@ function displayNewModal() {
         month = "0" + month;
     if (day < 10)
         day = "0" + day;
-    var today = now.getFullYear() + '-' + month + '-' + day + ' 23:59';
+    var today = now.getFullYear() + '-' + month + '-' + day + 'T23:59';
     $('#new-date-input').val(today)
 
     if (!classes_cached) {
-        $.ajax('/get-classes').done(function (data) {
-            localStorage['classes'] = data;
-        })
+        $.ajax({
+            url: '/get-classes',
+            type: 'GET',
+            data: {
+                user_id: localStorage['user_id']
+            },
+            success: function (data) {
+                localStorage['classes'] = data;
+                $('#class-select').html(localStorage['classes']);
+            }
+        });
         classes_cached = true;
     }
-    $('.edit-sub').html(localStorage['classes']);
-    
+    else 
+        $('#class-select').html(localStorage['classes']);
 }
+
 
 
 
@@ -129,14 +155,6 @@ $(document).on('keydown', document, async function (e) {
     else if (e.key == 'd' && e.altKey) {
         displayDeleteModal();
     }
-    
-    //else if (e.key == 'Escape') {
-    //    if ($('.items').hasClass('base-inactive')) {
-    //        $('.items').removeClass('base-inactive')
-    //        $('#newModal').fadeToggle();
-    //        AssignmentModalVisible = false;
-    //    }
-    //}
 
     else if (e.key == 'Enter') {
         if ($('#a-btn').hasClass('active')) {
@@ -147,18 +165,6 @@ $(document).on('keydown', document, async function (e) {
 
 const assignmentCreationModalBox = document.getElementById("assignmentCreationBox");
 
-/* bugged and too lazy to fix
-for some reason closes the window when you click on the greyed out days of the calendar
-$(document).on('click', '#newModal', function(e) {
-    const isClickInside = assignmentCreationModalBox.contains(e.target);
-    console.log(isClickInside);
-    console.log(e.target);
-    if (!isClickInside) {
-        $('.items').toggleClass('base-inactive')
-        $('#newModal').fadeToggle();
-    }
-});
-*/
 
 $(document).on('click', "#addButton", function () {
     displayNewModal();
@@ -181,6 +187,11 @@ function newClass() {
     let color = $('#new-color').val();
     let notes = $('#notes').val();
 
+    if (!localStorage['user_id'] || localStorage['user_id'] === 'null') {
+        alert('Please log in to create a class');
+        return;
+    }
+
     $.ajax({
         url: '/new-class',
         type: 'POST',
@@ -188,15 +199,25 @@ function newClass() {
             title: title,
             item_type: item_type,
             color: color,
-            notes: notes
+            notes: notes,
+            user_id: localStorage['user_id']
         },
         success: function (data) {
             if (data == 'success') {
                 $('#newModal').modal('hide');
                 $('#newModal').find('input:text').val('');
                 $('#newModal').find('textarea').val('');
-            } else {
-                alert('Error');
+            } else if (data == 'duplicate') {
+                alert('Class already exists'); // TODO: make this look good
+            }
+            else if (data == 'user_id_error') {
+                alert('You need to be logged in in order to create a class'); // TODO: make this look good
+            }
+            else if (data == 'title_error') {
+                alert('Class title cannot be empty'); // TODO: make this look good
+            }
+            else {
+                alert('Unknown Error');
             }
         },
         error: function (data) {
@@ -219,10 +240,11 @@ function slideElement(element, direction) {
 function newAssignment() {
     let a_name = $('#new-title').val();
     let item_type = "Assignment";
-    let sub = $('.edit-sub').val();
+    let C = $('#class-select').val();
     let date = $('.date-input').val();
     let content = $('#assignment-content').val();
     let notes = $('#notes').val();
+    let user_id = localStorage['user_id'];
 
     $.ajax({
         url: '/new-assignment',
@@ -230,10 +252,11 @@ function newAssignment() {
         data: {
             a_name: a_name,
             item_type: item_type,
-            sub: sub,
+            class: C,
             date: date,
             content: content,
             notes: notes,
+            user_id: user_id
         },
         success: function (data) {
             if (data == 'success') {
@@ -241,12 +264,16 @@ function newAssignment() {
                 $('#newModal').find('input:text').val('');
                 $('#newModal').find('textarea').val('');
             }
-            else if (data == 'error sub') {
+            else if (data == 'error class') {
                 alert('Error, please create a class first');
                 console.error(data);
             }
             else if (data == 'error a_name') {
                 alert('Error, please enter a name for the assignment');
+                console.error(data);
+            }
+            else if (data == "error user_id") {
+                alert('Error, please log in to create an assignment');
                 console.error(data);
             }
             else {
@@ -276,12 +303,19 @@ $(document).on('click', '.new-type-btn', function () {
 
 
         if (!classes_cached) {
-            $.ajax('/get-classes').done(function (data) {
-                localStorage['classes'] = data;
-            })
+            $.ajax({
+                url: '/get-classes',
+                type: 'GET',
+                data: {
+                    user_id: localStorage['user_id']
+                },
+                success: function (data) {
+                    localStorage['classes'] = data;
+                }
+            });
             classes_cached = true;
         }
-        $('.edit-sub').html(localStorage['classes']);
+        $('#class-select').html(localStorage['classes']);
 
     }
     else {
@@ -453,3 +487,50 @@ color_picker.on('input', function (e) {
     let color = color_picker.val();
     color_picker.css('background-color', color);
 });
+
+function login() {
+    let username = $('#username').val();
+    let password = $('#password').val();
+    $.ajax({
+        url: '/login',
+        type: 'POST',
+        data: {
+            username: username,
+            password: password
+        }
+    }).done(function (data) {
+        console.log(data);
+        if (data.slice(0, 7) == 'success') {
+            localStorage['user_id'] = data.slice(7);
+            window.location.replace('/');
+        }
+    });
+}
+
+$("#register").submit(function(e) {
+    return false;
+});
+
+$("#login").submit(function(e) {
+    return false;
+});
+
+function register() {
+    let username = $('#username').val();
+    let password = $('#password').val();
+
+
+    $.ajax({
+        url: '/register',
+        type: 'POST',
+        data: {
+            username: username,
+            password: password
+        }
+    }).done(function (data) {
+        console.log(data);
+        if (data == 'success') {
+            window.location.replace('/login');
+        }
+    });
+}

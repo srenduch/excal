@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS assignments (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    sub TEXT NOT NULL,
+    assignment_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    class_id INTEGER NOT NULL,
     item_type TEXT NOT NULL,
     a_name TEXT NOT NULL,
     content TEXT NOT NULL,
@@ -8,15 +8,18 @@ CREATE TABLE IF NOT EXISTS assignments (
     time TEXT,
     notes TEXT,
     time_remaining TEXT,
-    FOREIGN KEY (sub) REFERENCES classes(title)
+    FOREIGN KEY (class_id) REFERENCES classes(id)
     ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS classes (
-    title TEXT PRIMARY_KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT, /* two classes can have the same name between two users so we cant have it as primary key*/
     color TEXT NOT NULL,
     item_type TEXT NOT NULL,
-    notes TEXT
+    notes TEXT,
+    owner_id INTEGER NOT NULL,
+    FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS tests (
@@ -28,3 +31,9 @@ CREATE TABLE IF NOT EXISTS tests (
     time_remaining DATE
 );
 
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT NOT NULL UNIQUE,
+    password VARCHAR(64) NOT NULL, /* hash password */ 
+    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
