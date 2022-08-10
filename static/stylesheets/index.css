@@ -312,3 +312,24 @@ input::-webkit-color-swatch {
     background-color: #090b0c;
     color: #a2a4a7;
 }
+.custom-header {
+    padding: 0;
+}
+.custom-header-item {
+    align-self: flex-start;
+    width: 33%;
+    height: 100%;
+    align-items: center;
+    margin: 16px;
+}
+
+input[type="color"] {
+	-webkit-appearance: none;
+	border: none;
+}
+input[type="color"]::-webkit-color-swatch-wrapper {
+	padding: 0;
+}
+input[type="color"]::-webkit-color-swatch {
+	border: none;
+}
