@@ -15,16 +15,16 @@
                 <div class="modal-header">
                     <h4>Delete</h4>
                 </div>
-                <div class="modal-header" id="delete-type-select">
-                    <button name="item-type" type="button" class="delete-type-btn active" id="a-btn">Assignment</button>
-                    <button name="item-type" type="button" class="delete-type-btn inactive" id="c-btn">Class</button>
-                    <button name="item-type" type="button" class="delete-type-btn inactive" id="t-btn">Test</button>
+                <div class="modal-header" id="type-select">
+                    <button name="item-type" type="button" class="type-btn a-btn disableEnter">Assignment</button>
+                    <button name="item-type" type="button" class="type-btn c-btn disableEnter">Class</button>
+                    <button name="item-type" type="button" class="type-btn t-btn disableEnter">Test</button>
                 </div>
                 <div class="modal-header" id="delete-class-select">
-                    <select name="sub" class="edit-sub">
+                    <select name="sub" class="choose-dropdown choose-class disableEnter">
                     </select>
                     <div class="assignment" id="delete-assignment-select">
-                        <select name="sub" class="edit-sub">
+                        <select name="sub" class="choose-dropdown choose-assignment disableEnter">
                         </select>
                     </div>
                 </div>
@@ -44,10 +44,10 @@
                     placeholder="Add a title" autocomplete="off"></input>
                 </div>
                 
-                <div class="modal-header" id="new-type-select">
-                    <button name="item-type" type="button" class="new-type-btn active" id="a-btn">Assignment</button>
-                    <button name="item-type" type="button" class="new-type-btn inactive" id="c-btn">Class</button>
-                    <button name="item-type" type="button" class="new-type-btn inactive" id="t-btn">Test</button>
+                <div class="modal-header" id="type-select">
+                    <button name="item-type" type="button" class="type-btn a-btn disableEnter">Assignment</button>
+                    <button name="item-type" type="button" class="type-btn c-btn disableEnter">Class</button>
+                    <button name="item-type" type="button" class="type-btn t-btn disableEnter">Test</button>
                 </div>
 
                 <div class="modal-header assignment" id="new-date">
@@ -83,23 +83,23 @@
                 </div>
                 
                 <div class="modal-header assignment" id="new-class-select">
-                    <select name="sub" class="edit-sub">
+                    <select name="sub" class="choose-dropdown choose-class disableEnter">
                     </select>
                 </div>
 
                 <div class="modal-header assignment textarea-holder" id="new-content">
-                    <textarea id="assignment-content" class="new-input-full" autocomplete="off" placeholder="Add content"></textarea>
+                    <textarea id="assignment-content" class="new-input-full disableEnter" autocomplete="off" placeholder="Add content"></textarea>
                 </div>
 
                 <div class="modal-header cls" id="new-class-color">
                     <input type="color" id="new-color" value="#ffffff" />
                 </div>
                 <div class="modal-header textarea-holder" id="new-notes">
-                    <textarea id="notes" autocomplete="off" class="new-input-full" name="notes" placeholder="Add notes"></textarea>
+                    <textarea id="notes" autocomplete="off" class="new-input-full disableEnter" name="notes" placeholder="Add notes"></textarea>
                 </div>
 
                 <div class="modal-footer">
-                    <button type="submit" id="new-submit-btn">Submit</button>
+                    <button type="submit submit-btn">Submit</button>
                 </div>
             </div>
         </div>

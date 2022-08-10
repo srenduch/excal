@@ -60,7 +60,19 @@ def cls(class_title) :
 @app.route('/get-assignments', methods=['GET'])
 def get_assignments() :
     query = ''
-    if request.args.get('num_refresh') == '1' :
+    num_refresh = request.args.get('num_refresh')
+    cls_name = request.args.get('cls_name')
+
+    # Fetch all from class name
+    if cls_name :
+        query = f"\
+            SELECT assignments.id, assignments.a_name \
+            FROM assignments \
+            WHERE '{request.args.get('cls_name')}' = assignments.sub \
+            "
+        
+    # Fetch most recently added
+    if num_refresh == '1' :
         query = "\
         SELECT assignments.id, assignments.a_name, assignments.sub \
         , assignments.item_type, assignments.date, assignments.time, \
@@ -68,7 +80,8 @@ def get_assignments() :
         FROM assignments, classes \
         WHERE classes.title = assignments.sub AND assignments.id=(SELECT max(id) FROM assignments) \
         "
-    else :
+    # Fetch all
+    elif num_refresh == '-1' :
         query = " \
         SELECT assignments.id, assignments.a_name, assignments.sub \
         , assignments.item_type, assignments.date, assignments.time, \
@@ -81,30 +94,33 @@ def get_assignments() :
     assignments_list = conn.execute(query).fetchall()
 
     html_str = ''
-    for a in assignments_list :
-        html_str+=f'<div class="item slide" id="assignment_{a["id"]}">'
-        html_str += f'<div class="display-container top">'
-        html_str += f'<h3>{a["a_name"]}</h3>'
-        html_str += "<div>"
-        html_str += '<button class="item-btn" id="edit"></button>'
-        # html_str += f'<button type="button" data-id="{a["id"]}" data-name="{a["a_name"]}" class="item-btn" data-toggle="modal" data-target="#deleteModal" id="delete"></button>'
-        html_str += f'<button type="button" data-id="{a["id"]}" data-name="{a["a_name"]}" class="item-btn" id="delete"></button>'
-        html_str += "</div>"
-        html_str += "</div>"
-        html_str += '<div class="display-container">'
-        html_str += '<h5 style="'
-        html_str += f'color: {a["color"]}";'
-        html_str += f'>{a["sub"]} </h5>'
-        html_str += '<h5>&nbsp;|&nbsp;</h5>'
-        html_str += f'<h5> {a["item_type"] }</h5>'
-        html_str += '</div>'
-        html_str += f'<span>Due in </span>'
-        if int(a['time_remaining'].split(':')[0]) <= 2 :
-            html_str += f'<span class="urgent">{a["time_remaining"]} </span>'
-        else :
-            html_str += f'<span>{a["time_remaining"]} </span>'
-        html_str += f'at {a["date"] } {a["time"]}</span>'
-        html_str += '</div>'
+    if not cls_name : 
+        for a in assignments_list :
+            html_str += f'<div class="item slide" id="assignment_{a["id"]}">'
+            html_str += f'<div class="display-container top">'
+            html_str += f'<h3>{a["a_name"]}</h3>'
+            html_str += "<div>"
+            html_str += '<button class="item-btn" id="edit"></button>'
+            html_str += f'<button type="button" data-id="{a["id"]}" data-name="{a["a_name"]}" class="item-btn" id="delete"></button>'
+            html_str += "</div>"
+            html_str += "</div>"
+            html_str += '<div class="display-container">'
+            html_str += '<h5 style="'
+            html_str += f'color: {a["color"]}";'
+            html_str += f'>{a["sub"]} </h5>'
+            html_str += '<h5>&nbsp;|&nbsp;</h5>'
+            html_str += f'<h5> {a["item_type"] }</h5>'
+            html_str += '</div>'
+            html_str += f'<span>Due in </span>'
+            if int(a['time_remaining'].split(':')[0]) <= 2 :
+                html_str += f'<span class="urgent">{a["time_remaining"]} </span>'
+            else :
+                html_str += f'<span>{a["time_remaining"]} </span>'
+            html_str += f'at {a["date"] } {a["time"]}</span>'
+            html_str += '</div>'
+    else :
+        for a in assignments_list :
+            html_str += f"<option style=\"color: black;\" value=\"{a['a_name']}\">{a['a_name']}</option>\n"
 
     return html_str
 

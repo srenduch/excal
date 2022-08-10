@@ -1,16 +1,22 @@
 $(window).on('load', function () {
-    fetchAssignments(-1);
+    fetchAssignments(-1, null);
 })
 
-function fetchAssignments(num_refresh) {
+function fetchAssignments(num_refresh, cls_name) {
     $.ajax({
         url: '/get-assignments',
         type: 'GET',
         data: {
             num_refresh: num_refresh,
+            cls_name: cls_name
         },
         success: function (data) {
-            $('.items').append(data);
+            if (cls_name) {
+                $('.choose-assignment').html(data);
+            }
+            else {
+                $('.items').append(data);
+            }
 
             setTimeout(function () {
                 slideElement($('.item'), 'right');
@@ -58,11 +64,21 @@ function deleteAssignment(assignment_id, assignment_name) {
 }
 
 function displayDeleteModal() {
-    $('.items').toggleClass('base-inactive');
+    $('.items').toggleClass('base-inactive')
+    $('.type-btn').addClass('inactive')
+    $('.a-btn').removeClass('inactive').addClass('active')
+    $('#deleteModal').fadeToggle();
+
+    $.ajax('/get-classes').done(function (data) {
+        $('.choose-class').html(data);
+        fetchAssignments(null, $('.choose-class').val());
+    })
 }
 
 function displayNewModal() {
     $('.items').toggleClass('base-inactive')
+    $('.type-btn').addClass('inactive')
+    $('.a-btn').removeClass('inactive').addClass('active')
     $('#newModal').fadeToggle();
 
     if (!$('#new-title').is('visible')) {
@@ -82,32 +98,41 @@ function displayNewModal() {
     $('#new-date-input').val(today)
 
     $.ajax('/get-classes').done(function (data) {
-        $('.edit-sub').html(data);
+        $('.choose-class').html(data);
     })
 }
 
 $(document).on('keydown', document, async function (e) {
-    if (e.key == 'n' && e.altKey) {
+    if (e.key == 'N' && e.altKey) {
         displayNewModal();
     }
-    else if (e.key == 'd' && e.altKey) {
+    else if (e.key == 'D' && e.altKey) {
         displayDeleteModal();
     }
     else if (e.key == 'Escape') {
         if ($('.items').hasClass('base-inactive')) {
             $('.items').removeClass('base-inactive')
-            $('#newModal').fadeToggle();
-            AssignmentModalVisible = false;
+            if ($('#newModal').is(':visible')) {
+                $('#newModal').fadeToggle();
+            }
+            else if ($('#deleteModal').is(':visible')) {
+                $('#deleteModal').fadeToggle();
+            }
         }
     }
     else if (e.key == 'Enter') {
-        if ($('#a-btn').hasClass('active')) {
+        console.log($('disableEnter').is(':focus'));
+        if ($('.disableEnter').is(':focus')) {
+            return;
+        }
+        else if ($('.a-btn').hasClass('active') && $('#newModal').is(':visible')) {
             newAssignment();
+        }
+        else if ($('.c-btn').hasClass('active') && $('#newModal').is(':visible')) {
+            newClass();
         }
     }
 })
-
-const assignmentCreationModalBox = document.getElementById("assignmentCreationBox");
 
 /* bugged and too lazy to fix
 for some reason closes the window when you click on the greyed out days of the calendar
@@ -126,11 +151,11 @@ $(document).on('click', "#addButton", function () {
     displayNewModal();
 });
 
-$(document).on("click", "#new-submit-btn", function () {
-    if ($('#c-btn').hasClass('active')) {
+$(document).on("click", ".submit-btn", function () {
+    if ($('.c-btn').hasClass('active')) {
         newClass();
     }
-    else if ($('#a-btn').hasClass('active')) {
+    else if ($('.a-btn').hasClass('active')) {
         newAssignment();
     }
 })
@@ -155,8 +180,12 @@ function newClass() {
                 $('#newModal').modal('hide');
                 $('#newModal').find('input:text').val('');
                 $('#newModal').find('textarea').val('');
-            } else {
-                alert('Error');
+            }
+            else if (data == 'title_error') {
+                alert('Error, please enter a name for the class');
+            }
+            else {
+                alert('Unknown Error');
             }
         },
         error: function (data) {
@@ -179,7 +208,7 @@ function slideElement(element, direction) {
 function newAssignment() {
     let a_name = $('#new-title').val();
     let item_type = "Assignment";
-    let sub = $('.edit-sub').val();
+    let sub = $('.choose-class').val();
     let date = $('.date-input').val();
     let content = $('#assignment-content').val();
     let notes = $('#notes').val();
@@ -197,7 +226,7 @@ function newAssignment() {
         },
         success: function (data) {
             if (data == 'success') {
-                fetchAssignments(1);
+                fetchAssignments(1, null);
                 $('#newModal').find('input:text').val('');
                 $('#newModal').find('textarea').val('');
             }
@@ -220,8 +249,8 @@ function newAssignment() {
     });
 }
 
-$(document).on('click', '.new-type-btn', function () {
-    $('.new-type-btn').removeClass('active').addClass('inactive');
+$(document).on('click', '.type-btn', function () {
+    $('.type-btn').removeClass('active').addClass('inactive');
     $(this).removeClass('inactive').addClass('active');
 
     if ($(this).text() == 'Class') {
@@ -235,7 +264,7 @@ $(document).on('click', '.new-type-btn', function () {
         $('.assignment').show();
 
         $.ajax('/get-classes').done(function (data) {
-            $('.edit-sub').html(data);
+            $('.choose-class').html(data);
         })
     }
     else {
