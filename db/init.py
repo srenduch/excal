@@ -1,6 +1,6 @@
 import sqlite3
 
-conn = sqlite3.connect('db.db')
+conn = sqlite3.connect('src/db.db')
 
 with open('db/schema.sql') as f:
     conn.executescript(f.read())
