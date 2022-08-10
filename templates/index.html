@@ -8,10 +8,37 @@
     <div id="deleteAlert" class="alert alert-success collapse" role="alert">
     </div>
 
-    <!-- assignment creation modal -->
+    <!-- delete modal -->
+    <div class="modal" tabindex="-1" role="dialog" id="deleteModal" data-backdrop="static">
+        <div class="modal-dialog" role="docuemnt">
+            <div class="modal-content" id="deleteModalBox">
+                <div class="modal-header">
+                    <h4>Delete</h4>
+                </div>
+                <div class="modal-header" id="delete-type-select">
+                    <button name="item-type" type="button" class="delete-type-btn active" id="a-btn">Assignment</button>
+                    <button name="item-type" type="button" class="delete-type-btn inactive" id="c-btn">Class</button>
+                    <button name="item-type" type="button" class="delete-type-btn inactive" id="t-btn">Test</button>
+                </div>
+                <div class="modal-header" id="delete-class-select">
+                    <select name="sub" class="edit-sub">
+                    </select>
+                    <div class="assignment" id="delete-assignment-select">
+                        <select name="sub" class="edit-sub">
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- new modal -->
     <div class="modal" tabindex="-1" role="dialog" id="newModal" data-backdrop="static">
         <div class="modal-dialog" role="document">
             <div class="modal-content" id="newModalBox">
+                <div class="modal-header">
+                    <h4>New</h4>
+                </div>
                 <div class="modal-header">
                     <input id="new-title" class="new-input-full" type="text" name="name" value="{{ request.form['name'] }}"
                     placeholder="Add a title" autocomplete="off"></input>

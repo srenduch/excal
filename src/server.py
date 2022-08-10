@@ -87,7 +87,8 @@ def get_assignments() :
         html_str += f'<h3>{a["a_name"]}</h3>'
         html_str += "<div>"
         html_str += '<button class="item-btn" id="edit"></button>'
-        html_str += f'<button type="button" data-id="{a["id"]}" data-name="{a["a_name"]}" class="item-btn" data-toggle="modal" data-target="#deleteModal" id="delete"></button>'
+        # html_str += f'<button type="button" data-id="{a["id"]}" data-name="{a["a_name"]}" class="item-btn" data-toggle="modal" data-target="#deleteModal" id="delete"></button>'
+        html_str += f'<button type="button" data-id="{a["id"]}" data-name="{a["a_name"]}" class="item-btn" id="delete"></button>'
         html_str += "</div>"
         html_str += "</div>"
         html_str += '<div class="display-container">'

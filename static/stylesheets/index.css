@@ -54,7 +54,8 @@
     border-radius: 0.25rem;
 }
 
-.new-type-btn {
+.new-type-btn,
+.delete-type-btn {
     border: none;
     transition: all 0.5s
 }
@@ -77,7 +78,8 @@
     background: rgba(255, 255, 255, 0.1);
 }
 
-#new-type-select {
+#new-type-select,
+#delete-type-select {
     display: flex;
     justify-content: space-around;
 }

@@ -54,7 +54,7 @@ $(document).on("click", ".item-btn", function () {
 })
 
 function deleteAssignment(assignment_id, assignment_name) {
-    //$('.items').toggleClass('base-inactive'); // see above, causes bug when modal is closed
+    $('.items').toggleClass('base-inactive'); // see above, causes bug when modal is closed
 }
 
 function displayDeleteModal() {
@@ -64,6 +64,7 @@ function displayDeleteModal() {
 function displayNewModal() {
     $('.items').toggleClass('base-inactive')
     $('#newModal').fadeToggle();
+
     if (!$('#new-title').is('visible')) {
         setTimeout(function () {
             $('#new-title').focus();
@@ -399,4 +400,4 @@ $(document).on('click', '#calendar-header-right-arrow', function () {
     }
     console.log(month, year);
     setCalendar(month, year);
-});
+})
