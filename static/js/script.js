@@ -10,12 +10,7 @@ function fetchAssignments(num_refresh) {
             num_refresh: num_refresh,
         },
         success: function (data) {
-            if (num_refresh == 1) {
-                $('.items').append(data);
-            }
-            else {
-                $('.items').html(data);
-            }
+            $('.items').append(data);
 
             setTimeout(function () {
                 slideElement($('.item'), 'right');
