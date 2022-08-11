@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 
-
 {% block content %}
     <img src="{{ url_for('static', filename='assets/message-square-add-solid-72.png') }}" alt="Add" class="img-fluid Add" id="addButton">
     <!-- assignment deletion alert-->
@@ -15,7 +14,7 @@
                 <div class="modal-header">
                     <h4 id="delete-header">Delete</h4>
                 </div>
-                <div class="modal-header" id="type-select">
+                <div class="modal-header type-select">
                     <button name="item-type" type="button" class="type-btn a-btn disableEnter">Assignment</button>
                     <button name="item-type" type="button" class="type-btn c-btn disableEnter">Class</button>
                     <button name="item-type" type="button" class="type-btn t-btn disableEnter">Test</button>
@@ -31,7 +30,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit"class="submit-btn">Submit</button>
+                    <button type="submit"class="submit-btn" id="new-submit-btn">Submit</button>
                 </div>
             </div>
         </div>
@@ -49,7 +48,7 @@
                     placeholder="Add a title" autocomplete="off"></input>
                 </div>
                 
-                <div class="modal-header" id="type-select">
+                <div class="modal-header custom-header type-select">
                     <button name="item-type" type="button" class="type-btn a-btn disableEnter">Assignment</button>
                     <button name="item-type" type="button" class="type-btn c-btn disableEnter">Class</button>
                     <button name="item-type" type="button" class="type-btn t-btn disableEnter">Test</button>
@@ -145,4 +144,3 @@
         {% endfor %}
     {% endif %}
     -->
-{% endblock %}
