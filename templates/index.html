@@ -14,10 +14,10 @@
                 <div class="modal-header">
                     <h4 id="delete-header">Delete</h4>
                 </div>
-                <div class="modal-header type-select">
-                    <button name="item-type" type="button" class="type-btn a-btn disableEnter">Assignment</button>
-                    <button name="item-type" type="button" class="type-btn c-btn disableEnter">Class</button>
-                    <button name="item-type" type="button" class="type-btn t-btn disableEnter">Test</button>
+                <div class="modal-header custom-header type-select">
+                    <button name="item-type" type="button" class="type-btn a-btn custom-header-item active disableEnter">Assignment</button>
+                    <button name="item-type" type="button" class="type-btn c-btn custom-header-item inactive disableEnter">Class</button>
+                    <button name="item-type" type="button" class="type-btn t-btn custom-header-item inactive disableEnter">Test</button>
                 </div>
                 <div class="modal-header" id="delete-class-select">
                     <select name="sub" id="delete-choose-class" class="choose-dropdown choose-class disableEnter">
@@ -49,9 +49,9 @@
                 </div>
                 
                 <div class="modal-header custom-header type-select">
-                    <button name="item-type" type="button" class="type-btn a-btn disableEnter">Assignment</button>
-                    <button name="item-type" type="button" class="type-btn c-btn disableEnter">Class</button>
-                    <button name="item-type" type="button" class="type-btn t-btn disableEnter">Test</button>
+                    <button name="item-type" type="button" class="type-btn a-btn custom-header-item active disableEnter">Assignment</button>
+                    <button name="item-type" type="button" class="type-btn c-btn custom-header-item inactive disableEnter">Class</button>
+                    <button name="item-type" type="button" class="type-btn t-btn custom-header-item inactive disableEnter">Test</button>
                 </div>
 
                 <div class="modal-header assignment" id="new-date">
@@ -144,3 +144,5 @@
         {% endfor %}
     {% endif %}
     -->
+
+{% endblock %}

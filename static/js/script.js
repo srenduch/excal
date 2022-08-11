@@ -98,13 +98,18 @@ function fetchClasses() {
 }
 
 function displayDeleteModal() {
-    $('.items').toggleClass('base-inactive')
-    $('#deleteModal').fadeToggle();
-    $('.type-btn').addClass('inactive').removeClass('active')
-    $('.assignment').show()
-    $('.a-btn').removeClass('inactive').addClass('active')
-    $('#delete-header').focus()
-    fetchClasses()
+    $('#deleteModal').modal({
+        backdrop: true,
+        keyboard: true,
+        focus: true,
+        show: true
+    });
+
+    // $('.items').toggleClass('base-inactive')
+    // $('#deleteModal').fadeToggle();
+    // $('.type-btn').addClass('inactive').removeClass('active')
+    // $('.assignment').show()
+    // $('.a-btn').removeClass('inactive').addClass('active')
 }
 
 function displayNewModal() {
@@ -510,12 +515,62 @@ $(document).ready(function () {
     });
 });
 
-$('#newModal').on('show.bs.modal', function () {
+let open = false;
+let previous_modal_id = null;
+$('#deleteModal').on('show.bs.modal', function () {
+    if (open) {
+        return
+    }
+    open = true;
+
     $('.items').addClass('base-inactive')
+    if (previous_modal_id != $(this)[0].id) {
+        $('.type-btn').addClass('inactive').removeClass('active')
+        $('.a-btn').addClass('active').removeClass('inactive')
+        $('.assignment').show()
+    }
+    else {
+        $('type-btn').toggleClass('active');
+    }
+
+    setTimeout(function () {
+        $('#delete-title').focus();
+    }, 300);
+
+    fetchClasses()
+});
+
+$('#deleteModal').on('hidden.bs.modal', function () {
+    $('.items').removeClass('base-inactive')
+    previous_modal_id = $(this)[0].id
+    open = false
+});
+
+$('#newModal').on('show.bs.modal', function () {
+    if (open) {
+        return
+    }
+    open = true
+
+    $('.items').addClass('base-inactive')
+    if (previous_modal_id != $(this)[0].id) {
+        $('.type-btn').addClass('inactive').removeClass('active')
+        $('.a-btn').addClass('active').removeClass('inactive')
+        $('.assignment').show()
+    }
+    else {
+        $('type-btn').toggleClass('active');
+    }
+
+    setTimeout(function () {
+        $('#new-title').focus();
+    }, 300);
 });
 
 $('#newModal').on('hidden.bs.modal', function () {
     $('.items').removeClass('base-inactive')
+    previous_modal_id = $(this)[0].id
+    open = false
 });
 
 var classes_cached = false;
