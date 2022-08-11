@@ -14,6 +14,9 @@ function fetchAssignments(num_refresh, cls_name) {
             if (cls_name) {
                 $('.choose-assignment').html(data);
             }
+            else if (num_refresh == -1) {
+                $('.items').html(data);
+            }
             else {
                 $('.items').append(data);
             }
@@ -63,16 +66,43 @@ function deleteAssignment(assignment_id, assignment_name) {
     $('.items').toggleClass('base-inactive'); // see above, causes bug when modal is closed
 }
 
+function deleteClass(class_name) {
+    $.ajax({
+        url: '/delete-class',
+        type: 'POST',
+        data: {
+            class_name: class_name
+        },
+        success: function (data) {
+            if (data == 'success') {
+                fetchAssignments(-1, null);
+                fetchClasses()
+            }
+
+            setTimeout(function () {
+                slideElement($('.item'), 'right');
+            }, 100)
+        },
+        error: function (data) {
+            console.error(data);
+        }
+    });
+
+}
+
+function fetchClasses() {
+    $.ajax('/get-classes').done(function (data) {
+        $('.choose-class').html(data);
+        fetchAssignments(null, $('.choose-class').val());
+    })
+}
+
 function displayDeleteModal() {
     $('.items').toggleClass('base-inactive')
     $('.type-btn').addClass('inactive')
     $('.a-btn').removeClass('inactive').addClass('active')
     $('#deleteModal').fadeToggle();
-
-    $.ajax('/get-classes').done(function (data) {
-        $('.choose-class').html(data);
-        fetchAssignments(null, $('.choose-class').val());
-    })
+    fetchClasses()
 }
 
 function displayNewModal() {
@@ -121,7 +151,6 @@ $(document).on('keydown', document, async function (e) {
         }
     }
     else if (e.key == 'Enter') {
-        console.log($('disableEnter').is(':focus'));
         if ($('.disableEnter').is(':focus')) {
             return;
         }
@@ -130,6 +159,12 @@ $(document).on('keydown', document, async function (e) {
         }
         else if ($('.c-btn').hasClass('active') && $('#newModal').is(':visible')) {
             newClass();
+        }
+        else if ($('.a-btn').hasClass('active') && $('#deleteModal').is(':visible')) {
+            deleteAssignment();
+        }
+        else if ($('.c-btn').hasClass('active') && $('#deleteModal').is(':visible')) {
+            deleteClass($('.choose-class').val());
         }
     }
 })

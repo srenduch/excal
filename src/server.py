@@ -195,6 +195,16 @@ def delete() :
     
     return "success"
 
+@app.route('/delete-class', methods=['POST'])
+def delete_class() :
+    class_name = request.form['class_name']
+    conn = get_db_conn()
+    conn.execute('DELETE FROM classes WHERE title = ?', (f"{class_name}",))
+    conn.commit()
+    conn.close()    
+
+    return "success"
+
 # Homepage
 @app.route('/')
 def index() :
