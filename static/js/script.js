@@ -66,14 +66,38 @@ function displayDeleteModal() {
     $('.items').toggleClass('base-inactive');
 }
 
+// changes the text of #new-submit-btn depending on the type of item being created
+$(document).ready(function() {
+    $("#a-btn").click(function() {
+        $("#new-submit-btn").text("Add Assignment");
+    });
+    $("#c-btn").click(function() {
+        $("#new-submit-btn").text("Add Class");
+    });
+    $("#t-btn").click(function() {
+        $("#new-submit-btn").text("Add Test");
+    });
+});
+
+$('#newModal').on('show.bs.modal' , function () {
+    $('.items').addClass('base-inactive')
+});
+
+$('#newModal').on('hidden.bs.modal', function () {
+    $('.items').removeClass('base-inactive')
+});
+
+var classes_cached = false;
+
 function displayNewModal() {
-    $('.items').toggleClass('base-inactive')
-    $('#newModal').fadeToggle();
-    if (!$('#new-title').is('visible')) {
-        setTimeout(function () {
-            $('#new-title').focus();
-        }, 300);
-    }
+    
+
+    $('#newModal').modal({
+        backdrop: true,
+        keyboard: true,
+        focus: true,
+        show: true
+    });
 
     var now = new Date();
     var month = (now.getMonth() + 1);
@@ -85,25 +109,35 @@ function displayNewModal() {
     var today = now.getFullYear() + '-' + month + '-' + day + ' 23:59';
     $('#new-date-input').val(today)
 
-    $.ajax('/get-classes').done(function (data) {
-        $('.edit-sub').html(data);
-    })
+    if (!classes_cached) {
+        $.ajax('/get-classes').done(function (data) {
+            localStorage['classes'] = data;
+        })
+        classes_cached = true;
+    }
+    $('.edit-sub').html(localStorage['classes']);
+    
 }
+
+
 
 $(document).on('keydown', document, async function (e) {
     if (e.key == 'n' && e.altKey) {
         displayNewModal();
     }
+
     else if (e.key == 'd' && e.altKey) {
         displayDeleteModal();
     }
-    else if (e.key == 'Escape') {
-        if ($('.items').hasClass('base-inactive')) {
-            $('.items').removeClass('base-inactive')
-            $('#newModal').fadeToggle();
-            AssignmentModalVisible = false;
-        }
-    }
+    
+    //else if (e.key == 'Escape') {
+    //    if ($('.items').hasClass('base-inactive')) {
+    //        $('.items').removeClass('base-inactive')
+    //        $('#newModal').fadeToggle();
+    //        AssignmentModalVisible = false;
+    //    }
+    //}
+
     else if (e.key == 'Enter') {
         if ($('#a-btn').hasClass('active')) {
             newAssignment();
@@ -133,6 +167,8 @@ $(document).on('click', "#addButton", function () {
 $(document).on("click", "#new-submit-btn", function () {
     if ($('#c-btn').hasClass('active')) {
         newClass();
+        classes_cached = false;
+
     }
     else if ($('#a-btn').hasClass('active')) {
         newAssignment();
@@ -238,9 +274,15 @@ $(document).on('click', '.new-type-btn', function () {
         $('.test').hide();
         $('.assignment').show();
 
-        $.ajax('/get-classes').done(function (data) {
-            $('.edit-sub').html(data);
-        })
+
+        if (!classes_cached) {
+            $.ajax('/get-classes').done(function (data) {
+                localStorage['classes'] = data;
+            })
+            classes_cached = true;
+        }
+        $('.edit-sub').html(localStorage['classes']);
+
     }
     else {
         $('.cls').hide();
@@ -404,4 +446,10 @@ $(document).on('click', '#calendar-header-right-arrow', function () {
     }
     console.log(month, year);
     setCalendar(month, year);
+});
+
+let color_picker = $('#new-color');
+color_picker.on('input', function (e) {
+    let color = color_picker.val();
+    color_picker.css('background-color', color);
 });
