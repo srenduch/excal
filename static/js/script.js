@@ -133,13 +133,13 @@ function displayNewModal() {
     // }
 
 
-    if (!classes_cached) {
-        $.ajax('/get-classes').done(function (data) {
-            localStorage['classes'] = data;
-        })
-        classes_cached = true;
-    }
-    $('.edit-sub').html(localStorage['classes']);
+    // if (!classes_cached) {
+    //     $.ajax('/get-classes').done(function (data) {
+    //         localStorage['classes'] = data;
+    //     })
+    //     classes_cached = true;
+    // }
+    // $('.edit-sub').html(localStorage['classes']);
 
     // $.ajax('/get-classes').done(function (data) {
     //     $('.choose-class').html(data);
@@ -319,14 +319,14 @@ $(document).on('click', '.type-btn', function () {
         $('.test').hide();
         $('.assignment').show();
 
-        if (!classes_cached) {
-            $.ajax('/get-classes').done(function (data) {
-                localStorage['classes'] = data;
-            })
-            classes_cached = true;
-        }
-        // $('.choose-class').html(localStorage['classes']);
-        $('#new-choose-class').html(localStorage['classes']);
+        // if (!classes_cached) {
+        //     $.ajax('/get-classes').done(function (data) {
+        //         localStorage['classes'] = data;
+        //     })
+        //     classes_cached = true;
+        // }
+        // // $('.choose-class').html(localStorage['classes']);
+        // $('#new-choose-class').html(localStorage['classes']);
 
         // $.ajax('/get-classes').done(function (data) {
         //     $('.choose-class').html(data);
@@ -557,6 +557,18 @@ $('#newModal').on('show.bs.modal', function () {
         $('.type-btn').addClass('inactive').removeClass('active')
         $('.a-btn').addClass('active').removeClass('inactive')
         $('.assignment').show()
+
+        var now = new Date();
+        var month = (now.getMonth() + 1)
+        var day = now.getDate();
+
+        if (month < 10)
+            month = `0${month}`
+        if (day < 10) {
+            day = `0${day}`
+        }
+        var today = `${now.getFullYear()}-${month}-${day}T23:59`
+        $('#new-date-input').val(today)
     }
     else {
         $('type-btn').toggleClass('active');
@@ -565,6 +577,14 @@ $('#newModal').on('show.bs.modal', function () {
     setTimeout(function () {
         $('#new-title').focus();
     }, 300);
+
+    if (!classes_cached) {
+        $.ajax('/get-classes').done(function (data) {
+            localStorage['classes'] = data;
+        })
+        classes_cached = true;
+    }
+    $('.choose-class').html(localStorage['classes']);
 });
 
 $('#newModal').on('hidden.bs.modal', function () {
