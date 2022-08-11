@@ -13,7 +13,7 @@
         <div class="modal-dialog" role="docuemnt">
             <div class="modal-content" id="deleteModalBox">
                 <div class="modal-header">
-                    <h4>Delete</h4>
+                    <h4 id="delete-header">Delete</h4>
                 </div>
                 <div class="modal-header" id="type-select">
                     <button name="item-type" type="button" class="type-btn a-btn disableEnter">Assignment</button>
@@ -21,15 +21,17 @@
                     <button name="item-type" type="button" class="type-btn t-btn disableEnter">Test</button>
                 </div>
                 <div class="modal-header" id="delete-class-select">
-                    <select name="sub" class="choose-dropdown choose-class disableEnter">
+                    <select name="sub" id="delete-choose-class" class="choose-dropdown choose-class disableEnter">
+                        <option value="" disabled selected hidden>Choose class</option>
                     </select>
                     <div class="assignment" id="delete-assignment-select">
                         <select name="sub" class="choose-dropdown choose-assignment disableEnter">
+                        <option value="" disabled selected hidden>Choose assignment</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit submit-btn">Submit</button>
+                    <button type="submit"class="submit-btn">Submit</button>
                 </div>
             </div>
         </div>
@@ -86,7 +88,8 @@
                 </div>
                 
                 <div class="modal-header assignment" id="new-class-select">
-                    <select name="sub" class="choose-dropdown choose-class disableEnter">
+                    <select name="sub" id="new-choose-class" class="choose-dropdown choose-class disableEnter">
+                        <option value="" disabled selected hidden>Choose class</option>
                     </select>
                 </div>
 
@@ -102,7 +105,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="submit submit-btn">Submit</button>
+                    <button type="submit" class="submit-btn">Submit</button>
                 </div>
             </div>
         </div>

@@ -99,17 +99,20 @@ function fetchClasses() {
 
 function displayDeleteModal() {
     $('.items').toggleClass('base-inactive')
-    $('.type-btn').addClass('inactive')
-    $('.a-btn').removeClass('inactive').addClass('active')
     $('#deleteModal').fadeToggle();
+    $('.type-btn').addClass('inactive').removeClass('active')
+    $('.assignment').show()
+    $('.a-btn').removeClass('inactive').addClass('active')
+    $('#delete-header').focus()
     fetchClasses()
 }
 
 function displayNewModal() {
     $('.items').toggleClass('base-inactive')
-    $('.type-btn').addClass('inactive')
-    $('.a-btn').removeClass('inactive').addClass('active')
     $('#newModal').fadeToggle();
+    $('.type-btn').addClass('inactive').removeClass('active')
+    $('.assignment').show()
+    $('.a-btn').removeClass('inactive').addClass('active')
 
     if (!$('#new-title').is('visible')) {
         setTimeout(function () {
@@ -164,7 +167,7 @@ $(document).on('keydown', document, async function (e) {
             deleteAssignment();
         }
         else if ($('.c-btn').hasClass('active') && $('#deleteModal').is(':visible')) {
-            deleteClass($('.choose-class').val());
+            deleteClass($('#delete-choose-class').val());
         }
     }
 })
@@ -187,11 +190,17 @@ $(document).on('click', "#addButton", function () {
 });
 
 $(document).on("click", ".submit-btn", function () {
-    if ($('.c-btn').hasClass('active')) {
+    if ($('.a-btn').hasClass('active') && $('#newModal').is(':visible')) {
+        newAssignment();
+    }
+    else if ($('.c-btn').hasClass('active') && $('#newModal').is(':visible')) {
         newClass();
     }
-    else if ($('.a-btn').hasClass('active')) {
-        newAssignment();
+    else if ($('.a-btn').hasClass('active') && $('#deleteModal').is(':visible')) {
+        deleteAssignment();
+    }
+    else if ($('.c-btn').hasClass('active') && $('#deleteModal').is(':visible')) {
+        deleteClass($('#delete-choose-class').val());
     }
 })
 
@@ -243,7 +252,7 @@ function slideElement(element, direction) {
 function newAssignment() {
     let a_name = $('#new-title').val();
     let item_type = "Assignment";
-    let sub = $('.choose-class').val();
+    let sub = $('#new-choose-class').val();
     let date = $('.date-input').val();
     let content = $('#assignment-content').val();
     let notes = $('#notes').val();
