@@ -1,43 +1,31 @@
 from datetime import datetime
 from os import urandom
 from flask import Flask, render_template, request, url_for, flash, redirect
+import threading
 
 from db import *
 from handlers import *
 
-
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['SECRET_KEY'] = urandom(12)
+
+db = DBInterface('../db/db.sqlite3')
+
+# threading.Thread(target=db.update_assignment_all_time_remaining, daemon=True).start()
 
 # Jinja-scope globals
 @app.context_processor
 def jinja_globals() :
-    conn = get_db_conn()
-    assignments = conn.execute('SELECT * FROM assignments').fetchall()
-    classes = conn.execute('SELECT * FROM classes').fetchall()
-    tests = conn.execute('SELECT * FROM tests').fetchall()
+    assignments = db.get_assignment_all()
+    classes = db.get_class_all()
 
-    for assignment in assignments :
-        time_remaining = calc_time_rem(f"{assignment['date']} {assignment['time']}")
-        if int(time_remaining.split(':')[0]) : 
-            conn.execute('DELETE FROM assignments WHERE id = ?', (assignment['id'],))
-        else :
-            conn.execute("UPDATE assignments SET time_remaining = ? WHERE id = ?", (time_remaining, assignment['id']))
-
-    conn.commit()
-    conn.close()
+    db.update_assignment_all_time_remaining()
 
     return {
         'assignments': assignments,
         'classes': classes,
-        'tests': tests,
+        # 'tests': tests,
     }
-
-def get_class(cls_title) :
-    conn = get_db_conn()
-    sub = conn.execute('SELECT * FROM classes WHERE title = ?', (cls_title,)).fetchone()
-    conn.close()
-    return sub
 
 # Assignments page
 @app.route('/assignments/')
@@ -50,38 +38,22 @@ def cls_page() :
     return render_template('index.html', subdir='classes/')
 
 # Individual class items
-@app.route('/classes/<path:class_title>')
-def cls(class_title) :
-    conn = get_db_conn()
-    cls = conn.execute('SELECT * FROM classes WHERE id = ?', (class_title,)).fetchone()
-    conn.close()
+@app.route('/classes/<int:class_id>')
+def cls(class_id) :
+    cls = db.get_class_one(class_id)
     return render_template('item.html', cls=cls)
 
 @app.route('/get-assignments', methods=['GET'])
 def get_assignments() :
-    query = ''
+    assignments_list = []
     if request.args.get('num_refresh') == '1' :
-        query = "\
-        SELECT assignments.id, assignments.a_name, assignments.sub \
-        , assignments.item_type, assignments.date, assignments.time, \
-        assignments.time_remaining, classes.color \
-        FROM assignments, classes \
-        WHERE classes.title = assignments.sub AND assignments.id=(SELECT max(id) FROM assignments) \
-        "
+        assignments_list = db.get_assignment_newest()
     else :
-        query = " \
-        SELECT assignments.id, assignments.a_name, assignments.sub \
-        , assignments.item_type, assignments.date, assignments.time, \
-        assignments.time_remaining, classes.color \
-        FROM assignments, classes \
-        WHERE classes.title = assignments.sub \
-        "
-    
-    conn = get_db_conn()
-    assignments_list = conn.execute(query).fetchall()
-
+        assignments_list = db.get_assignment_all()
+        
     html_str = ''
     for a in assignments_list :
+        color = db.get_class_for_assignment(a['id'])[0]['color']
         html_str+=f'<div class="item slide" id="assignment_{a["id"]}">'
         html_str += f'<div class="display-container top">'
         html_str += f'<h3>{a["a_name"]}</h3>'
@@ -92,7 +64,7 @@ def get_assignments() :
         html_str += "</div>"
         html_str += '<div class="display-container">'
         html_str += '<h5 style="'
-        html_str += f'color: {a["color"]}";'
+        html_str += f'color: {color}";'
         html_str += f'>{a["sub"]} </h5>'
         html_str += '<h5>&nbsp;|&nbsp;</h5>'
         html_str += f'<h5> {a["item_type"] }</h5>'
@@ -110,9 +82,7 @@ def get_assignments() :
 
 @app.route('/get-classes', methods=['GET'])
 def get_classes() :
-    conn = get_db_conn()
-    class_list = conn.execute('SELECT title FROM classes').fetchall()
-    conn.close()
+    class_list = db.get_class_all()
 
     html_str = ''
     for cls in class_list :
@@ -136,10 +106,15 @@ def new_assignment() :
     if not(a_name):
         return 'error a_name'
 
-    conn = get_db_conn()
-    conn.execute('INSERT INTO assignments (sub, item_type, a_name, content, date, time, time_remaining) VALUES (?, ?, ?, ?, ?, ?, ?)', (sub, item_type, a_name, content, date, time, time_remaining))
-    conn.commit()
-    conn.close()
+    db.add_assignment(
+        sub=sub,
+        item_type=item_type,
+        a_name=a_name,
+        content=content,
+        date=date,
+        time=time,
+        time_remaining=time_remaining,
+    )
     
     return 'success'
 
@@ -154,12 +129,12 @@ def new_class() :
     if not title :
         return 'title_error'
 
-    conn = get_db_conn()
-    conn.execute('INSERT INTO classes (title, color, item_type, notes) \
-                        VALUES (?, ?, ?, ?)', \
-                        (title, color, item_type, notes))
-    conn.commit()
-    conn.close()
+    db.add_class(
+        title=title,
+        item_type=item_type,
+        color=color,
+        notes=notes,
+    )
     
     return 'success'
 
@@ -170,11 +145,7 @@ def delete() :
     item_id = request.form['id']
     
     if item_type == "assignment" :
-
-        conn = get_db_conn()
-        conn.execute('DELETE FROM assignments WHERE id = ?', (item_id,))
-        conn.commit()
-        conn.close()
+        db.delete_assignment_one(item_id)
     
     return "success"
 

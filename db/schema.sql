@@ -13,7 +13,8 @@ CREATE TABLE IF NOT EXISTS assignments (
 );
 
 CREATE TABLE IF NOT EXISTS classes (
-    title TEXT PRIMARY_KEY,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
     color TEXT NOT NULL,
     item_type TEXT NOT NULL,
     notes TEXT
