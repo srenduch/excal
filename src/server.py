@@ -1,7 +1,8 @@
 from datetime import datetime
 from os import urandom
-from flask import Flask, render_template, request, url_for, flash, redirect
+from flask import Flask, render_template, request, Response
 import threading
+from http import HTTPStatus as status
 
 from db import *
 from handlers import *
@@ -19,7 +20,9 @@ def jinja_globals() :
     assignments = db.get_assignment_all()
     classes = db.get_class_all()
 
-    db.update_assignment_all_time_remaining()
+    db.modify_assignment_all({
+    'time_remaining': None
+    })
 
     return {
         'assignments': assignments,
@@ -30,30 +33,28 @@ def jinja_globals() :
 # Assignments page
 @app.route('/assignments/')
 def assignment_page() :
-    return render_template('index.html', subdir='assignments/')
+    return render_template('index.html', subdir='assignments/'), status.OK
 
 # Classes page
 @app.route('/classes/')
 def cls_page() :
-    return render_template('index.html', subdir='classes/')
+    return render_template('index.html', subdir='classes/'), status.OK
 
 # Individual class items
 @app.route('/classes/<int:class_id>')
 def cls(class_id) :
-    cls = db.get_class_one(class_id)
-    return render_template('item.html', cls=cls)
+    cls = db.get_class_one(id=class_id)
+    return render_template('item.html', cls=cls), status.OK
 
 @app.route('/get-assignments', methods=['GET'])
 def get_assignments() :
     assignments_list = []
-    if request.args.get('num_refresh') == '1' :
-        assignments_list = db.get_assignment_newest()
-    else :
-        assignments_list = db.get_assignment_all()
-        
+
+    assignments_list = getattr(db, f"get_assignment_{request.args.get('selector')}")()
+    
     html_str = ''
     for a in assignments_list :
-        color = db.get_class_for_assignment(a['id'])[0]['color']
+        cls = db.get_class_for_assignment(a['id'])[0]
         html_str+=f'<div class="item slide" id="assignment_{a["id"]}">'
         html_str += f'<div class="display-container top">'
         html_str += f'<h3>{a["a_name"]}</h3>'
@@ -64,10 +65,8 @@ def get_assignments() :
         html_str += "</div>"
         html_str += '<div class="display-container">'
         html_str += '<h5 style="'
-        html_str += f'color: {color}";'
-        html_str += f'>{a["sub"]} </h5>'
-        html_str += '<h5>&nbsp;|&nbsp;</h5>'
-        html_str += f'<h5> {a["item_type"] }</h5>'
+        html_str += f'color: {cls["color"]}";'
+        html_str += f'>{cls["title"]} </h5>'
         html_str += '</div>'
         html_str += f'<span>Due in </span>'
         if int(a['time_remaining'].split(':')[0]) <= 2 :
@@ -82,77 +81,69 @@ def get_assignments() :
 
 @app.route('/get-classes', methods=['GET'])
 def get_classes() :
-    class_list = db.get_class_all()
+    class_list = getattr(db, f"get_class_{request.args.get('selector')}")()
 
     html_str = ''
     for cls in class_list :
-        html_str += f"<option style=\"color: black;\" value=\"{cls['title']}\">{cls['title']}</option>\n"
+        html_str += f"<option data-class-id={cls['id']} style=\"color: black;\" value=\"{cls['title']}\">{cls['title']}</option>\n"
     return html_str
 
 # New assignment
 @app.route('/new-assignment', methods=['POST'])
 def new_assignment() :
-    sub = request.form['sub']
-    item_type = request.form['item_type']
-    a_name = request.form['a_name']
-    content = request.form['content']
-    date = request.form['date']
-    date, time = date.split('T')
-    time_remaining = calc_time_rem(f"{date} {time}")
+    # if not(sub):
+        # raise 
 
-    if not(sub):
-        return 'error sub'
+    # if not(a_name):
+        # raise 
 
-    if not(a_name):
-        return 'error a_name'
-
-    db.add_assignment(
-        sub=sub,
-        item_type=item_type,
-        a_name=a_name,
-        content=content,
-        date=date,
-        time=time,
-        time_remaining=time_remaining,
-    )
+    keys = tuple([arg.split('arguments[0]')[1][1:-1] for arg in request.form.keys()])
+    values = tuple(request.form.values())
+    properties = dict(zip(keys, values))
+    print(properties)
     
-    return 'success'
-
+    # Custom assignment modifications
+    properties['time_remaining'] = calc_time_rem(properties['date'])
+    db.add_assignment(properties)
+    
+    return Response(properties, status=status.OK)
+    
 # New class
 @app.route('/new-class', methods=['POST'])
 def new_class() :
-    title = request.form['title']
-    item_type = request.form['item_type']
-    color = request.form['color']
-    notes = request.form['notes']
+    keys = tuple([arg.split('arguments[0]')[1][1:-1] for arg in request.form.keys()])
+    values = tuple(request.form.values())
+    properties = dict(zip(keys, values))
+    db.add_class(properties)
 
-    if not title :
-        return 'title_error'
+    # title = request.form['title']
+    # color = request.form['color']
+    # notes = request.form['notes']
 
-    db.add_class(
-        title=title,
-        item_type=item_type,
-        color=color,
-        notes=notes,
-    )
+    # if not title :
+    #     return 'title_error'
+
+    # db.add_class(
+    #     title=title,
+    #     color=color,
+    #     notes=notes,
+    # )
     
-    return 'success'
+    return Response(status=status.OK)
 
 # Delete
-@app.route('/delete', methods=['POST'])
-def delete() :
-    item_type = request.form['type']
-    item_id = request.form['id']
-    
-    if item_type == "assignment" :
-        db.delete_assignment_one(item_id)
-    
-    return "success"
+@app.route('/delete-assignment', methods=['POST'])
+def delete_assignment(num_delete, assignment_id) :
+    # item_id = request.form['id']
+    getattr(db, f"delete_assignment{request.args.get('selector')}")(num_delete=num_delete, assignment_id=assignment_id)
+    # db.delete_assignment_one(item_id)
+  
+    return Response(status=status.OK)
 
 # Homepage
 @app.route('/')
 def index() :
-    return render_template('index.html')
+    return render_template('index.html'), status.OK
 
 # if __name__ == "__main__" :
     # app.jinja_env.auto_reload = True

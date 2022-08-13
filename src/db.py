@@ -99,8 +99,8 @@ class DBInterface() :
 
     Returns: a singleton list of the class.
     """
-    def get_class_one(self, class_id) -> list : 
-        query = f"SELECT * FROM classes WHERE id = {class_id}"
+    def get_class_one(self, **kwargs) -> list : 
+        query = f"SELECT * FROM classes WHERE {list(kwargs.keys())[0]} = {list(kwargs.values())[0]}"
         return self.__get_item(query)
 
     """
@@ -119,7 +119,8 @@ class DBInterface() :
     Returns: a singleton list of the class containing the assignment.
     """
     def get_class_for_assignment(self, assignment_id) -> list :
-        query = f"SELECT * FROM classes WHERE classes.id = {assignment_id}"
+        assignment = self.get_assignment_one(assignment_id)
+        query = f"SELECT * FROM classes WHERE classes.id = {assignment[0]['class_id']}"
         return self.__get_item(query)
 
     ###################
@@ -129,8 +130,9 @@ class DBInterface() :
     """
     Add a new assignment to the database.
     """
-    def add_assignment(self, **kwargs) -> None :
-        query = f"INSERT INTO assignments {tuple(kwargs.keys())} VALUES {tuple(kwargs.values())}"
+    def add_assignment(self, properties) -> None :
+        properties['date'], properties['time'] = properties['date'].split('T')
+        query = f"INSERT INTO assignments {tuple(properties.keys())} VALUES {tuple(properties.values())}"
         self.__execute_query(query)
         self.__save_db()
 
@@ -141,16 +143,19 @@ class DBInterface() :
     """
     Add a new class to the database.
     """
-    def add_class(self, **kwargs) -> None : 
-        query = f"INSERT INTO classes {tuple(kwargs.keys())} VALUES {tuple(kwargs.values())}"    
+    def add_class(self, properties) -> None : 
+        query = f"INSERT INTO classes {tuple(properties.keys())} VALUES {tuple(properties.values())}"
         self.__execute_query(query)
         self.__save_db()
+        # query = f"INSERT INTO classes {tuple(kwargs.keys())} VALUES {tuple(kwargs.values())}"    
+        # self.__execute_query(query)
+        # self.__save_db()
 
     ###################
     # Assignment Modifiers
     ###################
 
-    def modify_assignment_properties(self, assignment_id, **kwargs) :
+    def modify_assignment_one(self, assignment_id, **kwargs) :
         if 'id' in kwargs.keys() and assignment_id != kwargs['id'] :
             raise ValueError("Cannot change assignment id.")
         query = f"UPDATE assignments SET {tuple(kwargs.keys())} VALUES {tuple(kwargs.values())}\
@@ -158,25 +163,21 @@ class DBInterface() :
             "
         query = f"UPDATE assignments {tuple(kwargs.keys())} SET {tuple(kwargs.values())} WHERE id = {assignment_id}"
         self.__execute_query(query)
+        self.__save_db
     
-    def update_assignment_all_time_remaining(self) -> None :
+    def modify_assignment_all(self, properties) -> None :
         # while True :
         for assignment in self.get_assignment_all() :
-            time_remaining = calc_time_rem(f"{assignment['date']} {assignment['time']}")
-            if int(time_remaining.split(':')[0]) : 
-                self.delete_assignment_one(assignment['id'])
-            else :
-                # print(time_remaining)
-                # print(time_remaining, assignment['id'])
-
-                # query = f"UPDATE assignments SET time_remaining = ? WHERE id = ?", (time_remaining, assignment['id'])
-
-                query = f"UPDATE assignments SET time_remaining = '{time_remaining}' WHERE id = {assignment['id']}"
-                
-                print(query)
-                # print(self.get_assignment_one(assignment['id'])[0]['time_remaining'])
-                self.__execute_query(query)
-            
+            query = f"UPDATE assignments SET "
+            for property in properties.items() :
+                property = list(property)
+                if property[0] == 'time_remaining' :
+                    date_str = f"{assignment['date']}T{assignment['time']}"
+                    property[1] = f"'{calc_time_rem(date_str)}'"
+                query += f"{property[0]} = {property[1]}, "
+            query = f"{query[0:-2]} "
+            query += f"WHERE id = {assignment['id']}"
+            self.__execute_query(query)
         self.__save_db()
 
     ###################

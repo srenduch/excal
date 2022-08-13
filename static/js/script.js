@@ -1,72 +1,45 @@
+import { DBInterface } from './db.js';
+let db = new DBInterface();
+
 $(window).on('load', function () {
-    fetchAssignments(-1);
+    fetchAssignments('all', null).then((data) => {
+        $('.items').html(data);
+        setTimeout(function () {
+            slideElement($('.item'), 'right');
+        }, 100)
+    })
 })
 
-function fetchAssignments(num_refresh) {
-    $.ajax({
-        url: '/get-assignments',
-        type: 'GET',
-        data: {
-            num_refresh: num_refresh,
-        },
-        success: function (data) {
-            if (num_refresh == 1) {
-                $('.items').append(data);
-            }
-            else {
-                $('.items').html(data);
-            }
+function fetchAssignments(num_refresh, assignment_id) {
+    return eval(`db.getAssignment${num_refresh && num_refresh[0].toUpperCase() + num_refresh.slice(1).toLowerCase()}(${assignment_id ? assignment_id : ''})`)
+}
 
-            setTimeout(function () {
-                slideElement($('.item'), 'right');
-            }, 100)
-        },
-        error: function (data) {
-            console.error(data);
-        }
-    });
+function deleteAssignments(num_delete, assignment_id) {
+    return eval(`db.deleteAssignment${num_delete && num_delete[0].toUpperCase() + num_delete.slice(1).toLowerCase()}(${assignment_id ? assignment_id : ''})`)
 }
 
 $(document).on("click", ".item-btn", function () {
     var assignment_id = $(this).data("id");
     var assignment_name = $(this).data("name");
+
     $('#deleteButton').attr('onclick', function () {
-        $.ajax({
-            url: '/delete',
-            type: 'POST',
-            data: {
-                type: 'assignment',
-                id: assignment_id
-            },
-            success: function (data) {
-                if (data == 'success') {
-                    $('#deleteConfirmationModal').modal('hide');
-                    setTimeout(function () {
-                        $('#assignment_' + assignment_id).remove();
-                    }, 300)
-                } else {
-                    alert('Error');
-                }
-            },
-            error: function (data) {
-                console.error(data);
-            }
+        deleteAssignments('one', assignment_id).then((data) => {
+            setTimeout(function () {
+                $('#assignment_' + assignment_id).remove();
+            }, 100)
         });
-        setTimeout(function () {
-            slideElement($('#assignment_' + assignment_id), 'left');
-        }, 100)
-    });
+    })
 })
 
-function deleteAssignment(assignment_id, assignment_name) {
-    //$('.items').toggleClass('base-inactive'); // see above, causes bug when modal is closed
-}
+// function deleteAssignment(assignment_id, assignment_name) {
+//     $('.items').toggleClass('base-inactive'); // see above, causes bug when modal is closed
+// }
 
 function displayDeleteModal() {
     $('.items').toggleClass('base-inactive');
 }
 
-function displayNewModal() {
+async function displayNewModal() {
     $('.items').toggleClass('base-inactive')
     $('#newModal').fadeToggle();
     if (!$('#new-title').is('visible')) {
@@ -85,7 +58,7 @@ function displayNewModal() {
     var today = now.getFullYear() + '-' + month + '-' + day + ' 23:59';
     $('#new-date-input').val(today)
 
-    $.ajax('/get-classes').done(function (data) {
+    db.getClassAll().then((data) => {
         $('.edit-sub').html(data);
     })
 }
@@ -111,7 +84,7 @@ $(document).on('keydown', document, async function (e) {
     }
 })
 
-const assignmentCreationModalBox = document.getElementById("assignmentCreationBox");
+// const assignmentCreationModalBox = document.getElementById("assignmentCreationBox");
 
 /* bugged and too lazy to fix
 for some reason closes the window when you click on the greyed out days of the calendar
@@ -140,33 +113,15 @@ $(document).on("click", "#new-submit-btn", function () {
 })
 
 function newClass() {
-    let title = $('#new-title').val();
-    let item_type = "Class";
-    let color = $('#new-color').val();
-    let notes = $('#notes').val();
-
-    $.ajax({
-        url: '/new-class',
-        type: 'POST',
-        data: {
-            title: title,
-            item_type: item_type,
-            color: color,
-            notes: notes
-        },
-        success: function (data) {
-            if (data == 'success') {
-                $('#newModal').modal('hide');
-                $('#newModal').find('input:text').val('');
-                $('#newModal').find('textarea').val('');
-            } else {
-                alert('Error');
-            }
-        },
-        error: function (data) {
-            console.error(data);
-        }
-    });
+    db.addClass({
+        title: $('#new-title').val(),
+        color: $('#new-color').val(),
+        notes: $('#notes').val()
+    }).then((data) => {
+        $('#newModal').modal('hide');
+        $('#newModal').find('input:text').val('');
+        $('#newModal').find('textarea').val('');
+    })
 }
 
 function slideElement(element, direction) {
@@ -181,47 +136,17 @@ function slideElement(element, direction) {
 }
 
 function newAssignment() {
-    let a_name = $('#new-title').val();
-    let item_type = "Assignment";
-    let sub = $('.edit-sub').val();
-    let date = $('.date-input').val();
-    let content = $('#assignment-content').val();
-    let notes = $('#notes').val();
-
-    $.ajax({
-        url: '/new-assignment',
-        type: 'POST',
-        data: {
-            a_name: a_name,
-            item_type: item_type,
-            sub: sub,
-            date: date,
-            content: content,
-            notes: notes,
-        },
-        success: function (data) {
-            if (data == 'success') {
-                fetchAssignments(1);
-                $('#newModal').find('input:text').val('');
-                $('#newModal').find('textarea').val('');
-            }
-            else if (data == 'error sub') {
-                alert('Error, please create a class first');
-                console.error(data);
-            }
-            else if (data == 'error a_name') {
-                alert('Error, please enter a name for the assignment');
-                console.error(data);
-            }
-            else {
-                alert('Unknown error');
-                console.error(data);
-            }
-        },
-        error: function (data) {
-            console.error(data);
-        }
-    });
+    db.addAssignment({
+        a_name: $('#new-title').val(),
+        class_id: $('.edit-sub').find(':selected').data('class-id'),
+        date: `${$('.date-input').val()}:00`,
+        content: $('#assignment-content').val(),
+        notes: $('#notes').val(),
+    }).then((data) => {
+        fetchAssignments('newest')
+        $('#newModal').find('input:text').val('');
+        $('#newModal').find('textarea').val('');
+    })
 }
 
 $(document).on('click', '.new-type-btn', function () {
@@ -238,7 +163,7 @@ $(document).on('click', '.new-type-btn', function () {
         $('.test').hide();
         $('.assignment').show();
 
-        $.ajax('/get-classes').done(function (data) {
+        db.getClassAll().then((data) => {
             $('.edit-sub').html(data);
         })
     }
@@ -402,6 +327,5 @@ $(document).on('click', '#calendar-header-right-arrow', function () {
     else {
         month = month + 1;
     }
-    console.log(month, year);
     setCalendar(month, year);
 });
