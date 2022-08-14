@@ -9,4 +9,5 @@ def calc_time_rem(due_date_str) :
     secs = time_remaining.seconds - (hours*3600 + mins*60)
     time_remaining = f"{days:02d}:{hours:02d}:{mins:02d}:{secs:02d}"
 
+    print(time_remaining)
     return time_remaining

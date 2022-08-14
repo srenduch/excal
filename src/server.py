@@ -1,11 +1,12 @@
 from datetime import datetime
 from os import urandom
-from flask import Flask, render_template, request, url_for, flash, redirect
+from flask import Flask, render_template, request, url_for, flash, redirect, jsonify
 
 from db import *
 from handlers import *
 
 from hashlib import sha256
+
 
 app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['SECRET_KEY'] = urandom(12)
@@ -20,7 +21,8 @@ def jinja_globals() :
 
     for assignment in assignments :
         time_remaining = calc_time_rem(f"{assignment['date']} {assignment['time']}")
-        if int(time_remaining.split(':')[0]) : 
+        #print(time_remaining.split(':')[0])
+        if int(time_remaining.split(':')[0]) < 0: 
             conn.execute('DELETE FROM assignments WHERE assignment_id = ?', (assignment['assignment_id'],))
         else :
             conn.execute("UPDATE assignments SET time_remaining = ? WHERE assignment_id = ?", (time_remaining, assignment['assignment_id']))
@@ -59,7 +61,7 @@ def get_assignments() :
     query = ''
     if request.args.get('num_refresh') == '1' :
         query = "\
-        SELECT assignments.*, classes.color \
+        SELECT assignments.*, classes.color, classes.title \
         FROM assignments \
         JOIN classes ON assignments.class_id = classes.id \
         JOIN (SELECT max(assignments.assignment_id) AS max_id FROM assignments )  \
@@ -68,7 +70,7 @@ def get_assignments() :
         "
     else :
         query = " \
-        SELECT assignments.*, classes.color \
+        SELECT assignments.*, classes.color, classes.title \
         FROM assignments \
         JOIN classes ON assignments.class_id = classes.id \
         WHERE classes.owner_id = ? \
@@ -90,7 +92,7 @@ def get_assignments() :
         html_str += '<div class="display-container">'
         html_str += '<h5 style="'
         html_str += f'color: {a["color"]}";'
-        html_str += f'>{a["class_id"]} </h5>'
+        html_str += f'>{a["title"]} </h5>'
         html_str += '<h5>&nbsp;|&nbsp;</h5>'
         html_str += f'<h5> {a["item_type"] }</h5>'
         html_str += '</div>'
@@ -254,7 +256,33 @@ def login() :
 def logout() :
     return render_template('logout.html')
 
+
+@app.route('/get-assignments-between-dates')
+def get_assignments_between_dates() :
+    conn = get_db_conn()
+    user_id = request.args.get('user_id')
+    start_date = request.args.get('start')
+    end_date = request.args.get('end')
+    # add quotes to start and end date
+    start_date = f"'{start_date}'"
+    end_date = f"'{end_date}'"
     
+    
+    # get assignments (and the corresponding class color) between start and end date 
+    assignments = conn.execute(f'\
+            SELECT assignments.*, color FROM assignments \
+            JOIN classes ON assignments.class_id = classes.id \
+            WHERE date BETWEEN {start_date} AND {end_date}').fetchall()
+    
+    
+    assignments = [dict(row) for row in assignments]
+    
+    
+    conn.close()
+    
+    return jsonify(assignments)
+
+
 # if __name__ == "__main__" :
     # app.jinja_env.auto_reload = True
     # app.config['TEMPLATES_AUTO_RELOAD'] = True

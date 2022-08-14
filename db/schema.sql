@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS assignments (
     item_type TEXT NOT NULL,
     a_name TEXT NOT NULL,
     content TEXT NOT NULL,
-    date TEXT NOT NULL,
+    date DATE NOT NULL,
     time TEXT,
     notes TEXT,
     time_remaining TEXT,
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS tests (
 
 CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT NOT NULL UNIQUE,
+    username TEXT NOT NULL,
     password VARCHAR(64) NOT NULL, /* hash password */ 
     created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
