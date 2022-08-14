@@ -1,6 +1,9 @@
+import { DBInterface } from './db.js';
+let db = new DBInterface();
+
 function getToday() {
     let date = new Date();
-    return (x = date.getDay()) == 0 ? 7 : x;
+    return date.getDay() == 0 ? 7 : date.getDay();
 }
 
 class BigCalendar {
@@ -116,12 +119,12 @@ class BigCalendar {
                 monthstring = 'Dec';
                 break;
         }
-    
+
 
         if (this.mode == 'm') {
             $('#big-calendar-header-month').html(monthstring + ' ' + this.year);
             let days = getDaysInMonth(this.month, this.year);
-    
+
             let firstDay = getFirstDayOfMonth(this.month, this.year);
             firstDay = firstDay == 0 ? 7 : firstDay;
             let lastMonthDaysNum = getDaysInMonth(this.month - 1, this.year);
@@ -162,10 +165,10 @@ class BigCalendar {
                     this.startYear = this.year;
                 }
             }
-            
-            
 
-    
+
+
+
             for (let i = 0; i < days; i++) {
                 $('#big-calendar-body').append(`
                 <div class="big-calendar-body-day" id="${formatDate(this.year, this.month, i + 1)}">
@@ -176,7 +179,7 @@ class BigCalendar {
                     </div>    
                 </div>`);
             }
-    
+
             let lastDay = getLastDayOfMonth(this.month, this.year);
             lastDay = lastDay == 0 ? 7 : lastDay;
             let i;
@@ -201,7 +204,7 @@ class BigCalendar {
                     </div>   
                 </div>`);
             }
-    
+
             // fill last row with days of the next month if necessary
             if (firstDay - 1 + days <= 35) {
                 for (let d = i; i < d + 7; i++) {
@@ -228,28 +231,21 @@ class BigCalendar {
             this.endDay = i;
 
             $('.big-calendar-body-day').on('click', function () {
-                console.log($(this).attr('id'));
                 // open create assignment modal on day
                 let date = $(this).attr('id');
                 let year = date.substring(0, 4);
                 let month = date.substring(5, 7);
                 let day = date.substring(8, 10);
-        
-                // console.log(day);
-                // console.log(month);
-                // console.log(year);
-        
-                // console.log(formatDate(year, month, day, 23, 59))
-        
+
                 displayNewModal(formatDate(year, month, day, 23, 59))
             });
 
-            
+
             this.getAssignments();
         }
 
         else if (this.mode == 'w') {
-            $('#big-calendar-header-month').html(`W${this.weekoffset+1} ${monthstring} ${this.year}`);
+            $('#big-calendar-header-month').html(`W${this.weekoffset + 1} ${monthstring} ${this.year}`);
             $('.big-calendar-body-day').remove();
             let firstDay = this.getFirstDayOfWeek;
             $('#big-calendar-monday').html(`M <div class="big-calendar-body-top-date">${firstDay}/${this.month + 1}</div>`);
@@ -263,7 +259,7 @@ class BigCalendar {
             $('#big-calendar-body').css('grid-template-columns', 'repeat(8, 1fr)');
             $('#big-calendar-body').css('grid-template-rows', 'auto 1fr');
             $('#big-calendar-body').prepend(
-                "<div></div>"                
+                "<div></div>"
             );
             let html = '';
             html += "<div class='big-calendar-body-day-hour-wrapper'>";
@@ -316,22 +312,19 @@ class BigCalendar {
         return this.endYear;
     }
 
-    addAssignmentsTocalendar(assignments) {
+    addAssignmentsToCalendar(assignments) {
         let start = new Date(this.getStartDate);
         let end = new Date(this.getEndDate);
-        //console.log(start);
-        //console.log(end);
-        for (let assignment of assignments) {
-            let assignmentDate = new Date(assignment.date);
-            //console.log(assignmentDate);
-            let day = assignmentDate.getDate();
+        assignments = eval(assignments)
+        assignments.forEach(element => {
+            let assignmentDate = new Date(element['date']);
+            let day = assignmentDate.getDate() + 1;
             let month = assignmentDate.getMonth() + 1;
             let year = assignmentDate.getFullYear();
             let id = formatDate(year, month, day);
-            let color = assignment.color;
-            //console.log(id);
-            $('#' + id).children('.big-calendar-body-day-assignments').append(`<div class="big-calendar-body-day-assignment" style="background-color: ${color}">${assignment.a_name}</div>`);
-            // check if colour is dark or light and adjust the text colour accordingly
+            let color = element['color']
+
+            $('#' + id).children('.big-calendar-body-day-assignments').append(`<div class="big-calendar-body-day-assignment" style="background-color: ${color}">${element['a_name']}</div>`);
 
             let r = parseInt(color.substring(1, 3), 16);
             let g = parseInt(color.substring(3, 5), 16);
@@ -343,27 +336,16 @@ class BigCalendar {
             else {
                 $('#' + id).children('.big-calendar-body-day-assignments').children('.big-calendar-body-day-assignment').css('color', 'black');
             }
-                
-            
-        }
+        });
     }
 
     getAssignments() {
-        $.ajax({
-            url: '/get-assignments-between-dates',
-            type: 'GET',
-            data: {
-                start: Calendar.getStartDate,
-                end: Calendar.getEndDate,
-                user_id: localStorage['user_id']
-            },
-            success: function (data) {
-                //data = JSON.parse(data)
-                //console.log(data);
-                Calendar.addAssignmentsTocalendar(data, this.mode);
-            }
+        db.getAssignmentDateRange(
+            Calendar.getStartDate,
+            Calendar.getEndDate
+        ).then((data) => {
+            Calendar.addAssignmentsToCalendar(data, this.mode);
         });
-    
     }
 
     clearAssignments() {
@@ -386,7 +368,12 @@ function formatDate(year, month, day, hour, minute) {
 
 
 $(window).on('load', function () {
-    fetchAssignments(-1);
+    fetchAssignments('all', null).then((data) => {
+        $('.items').html(data);
+        setTimeout(function () {
+            slideElement($('.item'), 'right');
+        }, 100)
+    })
     $('#new-color').on('input', function () {
         let color = $('#new-color').val();
         $('#new-color').css('background-color', color);
@@ -395,7 +382,7 @@ $(window).on('load', function () {
         let now = new Date();
         let month = (now.getMonth() + 1);
         let year = now.getFullYear();
-        
+
         Calendar.setMonth = month;
         Calendar.setYear = year;
         Calendar.setMode = 'm';
@@ -440,11 +427,11 @@ $(window).on('load', function () {
     });
     $('#big-calendar-header-mode-selector-btn-month').on('click', function () {
         Calendar.setMode = 'm';
-        
+
         $('#big-calendar-header-mode-selector-btn-week').prop("disabled", false);
         $('#big-calendar-header-mode-selector-btn-month').prop("disabled", true);
         $('#big-calendar-header-mode-selector-btn-day').prop("disabled", false);
-        
+
         Calendar.setBigCalendar();
     });
     $('#big-calendar-header-mode-selector-btn-day').on('click', function () {
@@ -458,102 +445,60 @@ $(window).on('load', function () {
     });
 });
 
+function fetchAssignments(num_refresh, assignment_id) {
+    return eval(`db.getAssignment${num_refresh && num_refresh[0].toUpperCase() + num_refresh.slice(1).toLowerCase()}(${assignment_id ? assignment_id : ''})`)
+}
 
+function deleteAssignments(num_delete, assignment_id) {
+    return eval(`db.deleteAssignment${num_delete && num_delete[0].toUpperCase() + num_delete.slice(1).toLowerCase()}(${assignment_id ? assignment_id : ''})`)
 
-function fetchAssignments(num_refresh) {
-    $.ajax({
-        url: '/get-assignments',
-        type: 'GET',
-        data: {
-            num_refresh: num_refresh,
-            user_id: localStorage['user_id']
-        },
-        success: function (data) {
-            if (num_refresh == 1) {
-                $('.items').append(data);
-            }
-            else {
-                $('.items').html(data);
-            }
-
-            setTimeout(function () {
-                slideElement($('.item'), 'right');
-            }, 100);
-        },
-        error: function (data) {
-            console.error(data);
-        }
-    });
 }
 
 $(document).on("click", ".item-btn", function () {
     var assignment_id = $(this).data("id");
     var assignment_name = $(this).data("name");
-    $('#deleteButton').attr('onclick', function () {
-        $.ajax({
-            url: '/delete',
-            type: 'POST',
-            data: {
-                type: 'assignment',
-                id: assignment_id
-            },
-            success: function (data) {
-                Calendar.clearAssignments();
-                Calendar.getAssignments();
-                if (data == 'success') {
-                    $('#deleteConfirmationModal').modal('hide');
-                    setTimeout(function () {
-                        $('#assignment_' + assignment_id).remove();
-                    }, 300);
-                } else {
-                    alert('Error');
-                }
-            },
-            error: function (data) {
-                console.error(data);
-            }
-        });
-        setTimeout(function () {
-            slideElement($('#assignment_' + assignment_id), 'left');
-        }, 100);
-    });
-});
 
-function deleteAssignment(assignment_id, assignment_name) {
-    //$('.items').toggleClass('base-inactive'); // see above, causes bug when modal is closed
-}
+    $('#deleteButton').attr('onclick', function () {
+        deleteAssignments('one', assignment_id).then((data) => {
+            Calendar.clearAssignments();
+            Calendar.getAssignments();
+            $('#deleteConfirmationModal').modal('hide');
+            setTimeout(function () {
+                $('#assignment_' + assignment_id).remove();
+            }, 100);
+        });
+    })
+})
+
+// function deleteAssignment(assignment_id, assignment_name) {
+//     $('.items').toggleClass('base-inactive'); // see above, causes bug when modal is closed
+// }
 
 function displayDeleteModal() {
     $('.items').toggleClass('base-inactive');
 }
 
 // changes the text of #new-submit-btn depending on the type of item being created
-$(document).ready(function() {
-    $("#a-btn").click(function() {
+$(document).ready(function () {
+    $("#a-btn").click(function () {
         $("#new-submit-btn").text("Add Assignment");
     });
-    $("#c-btn").click(function() {
+    $("#c-btn").click(function () {
         $("#new-submit-btn").text("Add Class");
     });
-    $("#t-btn").click(function() {
+    $("#t-btn").click(function () {
         $("#new-submit-btn").text("Add Test");
     });
 });
 
-$('#newModal').on('show.bs.modal' , function () {
+$('#newModal').on('show.bs.modal', function () {
     $('.items').addClass('base-inactive');
+    $('.index-container').addClass('base-inactive');
     if (!classes_cached) {
-        $.ajax({
-            url: '/get-classes',
-            type: 'GET',
-            data: {
-                user_id: localStorage['user_id']
-            },
-            success: function (data) {
-                localStorage['classes'] = data;
-                $('#class-select').html(localStorage['classes']);
-            }
-        });
+        db.getClassAll().then((data) => {
+            localStorage['classes'] = data
+            $('#class-select').html(localStorage['classes'])
+        })
         classes_cached = true;
     }
     else
@@ -562,12 +507,19 @@ $('#newModal').on('show.bs.modal' , function () {
 
 $('#newModal').on('hidden.bs.modal', function () {
     $('.items').removeClass('base-inactive');
+    $('.index-container').removeClass('base-inactive');
 });
 
 var classes_cached = false;
 
 function displayNewModal(dateOverride) {
-    
+    // $('.items').toggleClass('base-inactive')
+    // $('#newModal').fadeToggle();
+    // if (!$('#new-title').is('visible')) {
+    //     setTimeout(function () {
+    //         $('#new-title').focus();
+    //     }, 300);
+    // }
 
     $('#newModal').modal({
         backdrop: true,
@@ -581,9 +533,10 @@ function displayNewModal(dateOverride) {
         let month = (now.getMonth() + 1);
         let day = now.getDate();
         if (month < 10)
-        month = "0" + month;
+            month = "0" + month;
         if (day < 10)
-        day = "0" + day;
+            day = "0" + day;
+        // var today = now.getFullYear() + '-' + month + '-' + day + ' 23:59';
         let today = now.getFullYear() + '-' + month + '-' + day + 'T23:59';
         $('#new-date-input').val(today);
     }
@@ -592,20 +545,13 @@ function displayNewModal(dateOverride) {
     }
 
     if (!classes_cached) {
-        $.ajax({
-            url: '/get-classes',
-            type: 'GET',
-            data: {
-                user_id: localStorage['user_id']
-            },
-            success: function (data) {
-                localStorage['classes'] = data;
-                $('#class-select').html(localStorage['classes']);
-            }
-        });
+        db.getClassAll().then((data) => {
+            localStorage['classes'] = data;
+            $('#class-select').html(localStorage['classes'])
+        })
         classes_cached = true;
     }
-    else 
+    else
         $('#class-select').html(localStorage['classes']);
 }
 
@@ -628,7 +574,7 @@ $(document).on('keydown', document, async function (e) {
     }
 });
 
-const assignmentCreationModalBox = document.getElementById("assignmentCreationBox");
+// const assignmentCreationModalBox = document.getElementById("assignmentCreationBox");
 
 
 $(document).on('click', "#addButton", function () {
@@ -647,48 +593,15 @@ $(document).on("click", "#new-submit-btn", function () {
 });
 
 function newClass() {
-    let title = $('#new-title').val();
-    let item_type = "Class";
-    let color = $('#new-color').val();
-    let notes = $('#notes').val();
-
-    if (!localStorage['user_id'] || localStorage['user_id'] === 'null') {
-        alert('Please log in to create a class');
-        return;
-    }
-
-    $.ajax({
-        url: '/new-class',
-        type: 'POST',
-        data: {
-            title: title,
-            item_type: item_type,
-            color: color,
-            notes: notes,
-            user_id: localStorage['user_id']
-        },
-        success: function (data) {
-            if (data == 'success') {
-                $('#newModal').modal('hide');
-                $('#newModal').find('input:text').val('');
-                $('#newModal').find('textarea').val('');
-            } else if (data == 'duplicate') {
-                alert('Class already exists'); // TODO: make this look good
-            }
-            else if (data == 'user_id_error') {
-                alert('You need to be logged in in order to create a class'); // TODO: make this look good
-            }
-            else if (data == 'title_error') {
-                alert('Class title cannot be empty'); // TODO: make this look good
-            }
-            else {
-                alert('Unknown Error');
-            }
-        },
-        error: function (data) {
-            console.error(data);
-        }
-    });
+    db.addClass({
+        title: $('#new-title').val(),
+        color: $('#new-color').val(),
+        notes: $('#notes').val()
+    }).then((data) => {
+        $('#newModal').modal('hide');
+        $('#newModal').find('input:text').val('');
+        $('#newModal').find('textarea').val('');
+    })
 }
 
 function slideElement(element, direction) {
@@ -703,55 +616,19 @@ function slideElement(element, direction) {
 }
 
 function newAssignment() {
-    let a_name = $('#new-title').val();
-    let item_type = "Assignment";
-    let C = $('#class-select').val();
-    let date = $('.date-input').val();
-    let content = $('#assignment-content').val();
-    let notes = $('#notes').val();
-    let user_id = localStorage['user_id'];
-
-    $.ajax({
-        url: '/new-assignment',
-        type: 'POST',
-        data: {
-            a_name: a_name,
-            item_type: item_type,
-            class: C,
-            date: date,
-            content: content,
-            notes: notes,
-            user_id: user_id
-        },
-        success: function (data) {
-            if (data == 'success') {
-                fetchAssignments(1);
-                Calendar.clearAssignments();
-                Calendar.getAssignments();
-                $('#newModal').find('input:text').val('');
-                $('#newModal').find('textarea').val('');
-            }
-            else if (data == 'error class') {
-                alert('Error, please create a class first');
-                console.error(data);
-            }
-            else if (data == 'error a_name') {
-                alert('Error, please enter a name for the assignment');
-                console.error(data);
-            }
-            else if (data == "error user_id") {
-                alert('Error, please log in to create an assignment');
-                console.error(data);
-            }
-            else {
-                alert('Unknown error');
-                console.error(data);
-            }
-        },
-        error: function (data) {
-            console.error(data);
-        }
-    });
+    db.addAssignment({
+        a_name: $('#new-title').val(),
+        class_id: $('.edit-sub').find(':selected').data('class-id'),
+        date: `${$('.date-input').val()}:00`,
+        content: $('#assignment-content').val(),
+        notes: $('#notes').val(),
+    }).then((data) => {
+        fetchAssignments('newest')
+        Calendar.clearAssignments();
+        Calendar.getAssignments();
+        $('#newModal').find('input:text').val('');
+        $('#newModal').find('textarea').val('');
+    })
 }
 
 $(document).on('click', '.new-type-btn', function () {
@@ -768,22 +645,13 @@ $(document).on('click', '.new-type-btn', function () {
         $('.test').hide();
         $('.assignment').show();
 
-
         if (!classes_cached) {
-            $.ajax({
-                url: '/get-classes',
-                type: 'GET',
-                data: {
-                    user_id: localStorage['user_id']
-                },
-                success: function (data) {
-                    localStorage['classes'] = data;
-                }
+            db.getClassAll().then((data) => {
+                localStorage['classes'] = data
             });
             classes_cached = true;
         }
         $('#class-select').html(localStorage['classes']);
-
     }
     else {
         $('.cls').hide();
@@ -899,7 +767,6 @@ $("#big-calendar-header-right-arrow").click(function () {
     else {
         month = month + 1;
     }
-    //console.log(month, year);
     setCalendar(month, year);
 });
 
@@ -973,53 +840,32 @@ $(document).on('click', '#calendar-header-right-arrow', function () {
     else {
         month = month + 1;
     }
-    //console.log(month, year);
     setCalendar(month, year);
 });
 
-function login() {
-    let username = $('#username').val();
-    let password = $('#password').val();
-    $.ajax({
-        url: '/login',
-        type: 'POST',
-        data: {
-            username: username,
-            password: password
-        }
-    }).done(function (data) {
-        //console.log(data);
-        if (data.slice(0, 7) == 'success') {
-            localStorage['user_id'] = data.slice(7);
-            window.location.replace('/');
-        }
-    });
-}
-
-$("#register").submit(function(e) {
-    return false;
-});
-
-$("#login").submit(function(e) {
-    return false;
-});
-
-function register() {
+$(document).on('click', '#register-btn', () => {
     let username = $('#username').val();
     let password = $('#password').val();
 
+    db.userRegister(username, password).then(function (data) {
+        localStorage['user_id'] = data
+        window.location.replace('/');
+    })
+})
 
-    $.ajax({
-        url: '/register',
-        type: 'POST',
-        data: {
-            username: username,
-            password: password
-        }
-    }).done(function (data) {
-        //console.log(data);
-        if (data == 'success') {
-            window.location.replace('/login');
-        }
-    });
-}
+$(document).on('click', '#login-btn', () => {
+    let username = $('#username').val();
+    let password = $('#password').val();
+    db.userLogin(username, password).then(function (data) {
+        localStorage['user_id'] = data
+        window.location.replace('/');
+    })
+})
+
+$("#register").submit(function (e) {
+    return false;
+});
+
+$("#login").submit(function (e) {
+    return false;
+});
