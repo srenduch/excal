@@ -1,4 +1,3 @@
-from datetime import datetime
 from os import urandom
 from flask import Flask, render_template, request, Response
 import threading
@@ -11,8 +10,6 @@ app = Flask(__name__, template_folder='../templates', static_folder='../static')
 app.config['SECRET_KEY'] = urandom(12)
 
 db = DBInterface('../db/db.sqlite3')
-
-# threading.Thread(target=db.update_assignment_all_time_remaining, daemon=True).start()
 
 # Jinja-scope globals
 @app.context_processor
@@ -115,19 +112,6 @@ def new_class() :
     values = tuple(request.form.values())
     properties = dict(zip(keys, values))
     db.add_class(properties)
-
-    # title = request.form['title']
-    # color = request.form['color']
-    # notes = request.form['notes']
-
-    # if not title :
-    #     return 'title_error'
-
-    # db.add_class(
-    #     title=title,
-    #     color=color,
-    #     notes=notes,
-    # )
     
     return Response(status=status.OK)
 

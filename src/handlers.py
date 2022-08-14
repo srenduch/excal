@@ -1,4 +1,3 @@
-from math import floor
 from datetime import datetime
 
 def calc_time_rem(date_str) :

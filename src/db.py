@@ -1,9 +1,5 @@
-from re import T
 import sqlite3
-from datetime import datetime
-from math import floor
 from handlers import *
-from time import sleep
 
 """
 API for interfacing with the SQL database.
@@ -14,7 +10,6 @@ class DBInterface() :
     def __init__(self, path) :
         self.path = path
         self.conn = sqlite3.connect(self.path, check_same_thread=False)
-        # if len(self.get_class_all()) == 0 :
 
         self.__create_db()
         self.conn.row_factory = sqlite3.Row
