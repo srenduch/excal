@@ -1,6 +1,5 @@
 from os import urandom
 from flask import Flask, render_template, request, Response
-import threading
 from http import HTTPStatus as status
 
 from db import *
@@ -117,10 +116,10 @@ def new_class() :
 
 # Delete
 @app.route('/delete-assignment', methods=['POST'])
-def delete_assignment(num_delete, assignment_id) :
-    # item_id = request.form['id']
-    getattr(db, f"delete_assignment{request.args.get('selector')}")(num_delete=num_delete, assignment_id=assignment_id)
-    # db.delete_assignment_one(item_id)
+def delete_assignment() :
+    selector = request.form.get('selector')
+    assignment_id = request.form.get('assignment_id')
+    getattr(db, f"delete_assignment_{selector}")(assignment_id)
   
     return Response(status=status.OK)
 

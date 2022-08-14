@@ -129,7 +129,7 @@ export class DBInterface {
             url: '/delete-assignment',
             type: 'POST',
             data: {
-                num_delete: 'one',
+                selector: 'one',
                 assignment_id: assignment_id,
             },
             success: function (data) {
