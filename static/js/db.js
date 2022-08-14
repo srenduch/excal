@@ -1,11 +1,48 @@
 export class DBInterface {
-    constructor() { }
+    constructor(user_id) {
+        this.user_id = user_id
+    }
+
+    async userRegister(username, password) {
+        const result = await $.ajax({
+            url: '/register',
+            type: 'POST',
+            data: {
+                username: username,
+                password: password,
+            },
+            success: function (data) {
+            },
+            error: function (data) {
+                console.error(data);
+            }
+        });
+        return result;
+    }
+
+    async userLogin(username, password) {
+        const result = await $.ajax({
+            url: '/login',
+            type: 'POST',
+            data: {
+                username: username,
+                password: password,
+            },
+            success: function (data) {
+            },
+            error: function (data) {
+                console.error(data);
+            }
+        });
+        return result;
+    }
 
     async getAssignmentOne(assignment_id) {
         const result = $.ajax({
             url: '/get-assignments',
             type: 'GET',
             data: {
+                user_id: localStorage['user_id'],
                 assignment_id: assignment_id,
                 selector: 'one',
             },
@@ -24,6 +61,7 @@ export class DBInterface {
             url: '/get-assignments',
             type: 'GET',
             data: {
+                user_id: localStorage['user_id'],
                 assignment_id: null,
                 selector: 'all',
             },
@@ -41,6 +79,7 @@ export class DBInterface {
             url: '/get-assignments',
             type: 'GET',
             data: {
+                user_id: localStorage['user_id'],
                 assignment_id: null,
                 selector: 'newest',
             },
@@ -55,11 +94,30 @@ export class DBInterface {
 
     async getAssignmentForClass(class_id) { }
 
+    async getAssignmentDateRange(start, end) {
+        const result = await $.ajax({
+            url: '/get-assignments-between-dates',
+            type: 'GET',
+            data: {
+                user_id: localStorage['user_id'],
+                start: start,
+                end: end,
+            },
+            success: function (data) {
+            },
+            error: function (data) {
+                console.error(data);
+            }
+        });
+        return result;
+    }
+
     async getClassOne(class_id) {
         const result = await $.ajax({
             url: '/get-classes',
             type: 'GET',
             data: {
+                user_id: localStorage['user_id'],
                 class_id: class_id,
                 selector: 'one',
             },
@@ -77,6 +135,7 @@ export class DBInterface {
             url: '/get-classes',
             type: 'GET',
             data: {
+                user_id: localStorage['user_id'],
                 class_id: null,
                 selector: 'all',
             },
@@ -96,6 +155,8 @@ export class DBInterface {
             url: '/new-assignment',
             type: 'POST',
             data: {
+                user_id: localStorage['user_id'],
+                class_id: $('#new-class-select').find(":selected").data('class-id'),
                 arguments: arguments,
             },
             success: function (data) {
@@ -111,6 +172,7 @@ export class DBInterface {
             url: 'new-class',
             type: 'POST',
             data: {
+                user_id: localStorage['user_id'],
                 arguments: arguments,
             },
             success: function (data) {
@@ -129,6 +191,7 @@ export class DBInterface {
             url: '/delete-assignment',
             type: 'POST',
             data: {
+                user_id: localStorage['user_id'],
                 selector: 'one',
                 assignment_id: assignment_id,
             },
@@ -146,6 +209,7 @@ export class DBInterface {
             url: '/delete-assignment',
             type: 'POST',
             data: {
+                user_id: localStorage['user_id'],
                 class_id: null,
                 selector: 'all'
             },
@@ -163,6 +227,7 @@ export class DBInterface {
             url: '/delete-class',
             type: 'POST',
             data: {
+                user_id: localStorage['user_id'],
                 class_id: class_id,
                 selector: 'one'
             },
@@ -180,6 +245,7 @@ export class DBInterface {
             url: '/delete-class',
             type: 'POST',
             data: {
+                user_id: localStorage['user_id'],
                 class_id: null,
                 selector: 'all',
             },
