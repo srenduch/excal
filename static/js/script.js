@@ -1,6 +1,6 @@
 function getToday() {
     let date = new Date();
-    return (x = date.getDay()) == 0 ? 7 : x;
+    return date.getDay() == 0 ? 7 : date.getDay();
 }
 
 class BigCalendar {
@@ -9,8 +9,8 @@ class BigCalendar {
         this.year = year;
         this.mode = mode;
         let date = new Date();
-        let weekoffset = date.getDate() / 7 - 2 + (getToday() > getFirstDayOfMonth(month, year) ? 1 : 0);
-        this.weekoffset = Math.floor(weekoffset);
+        let weekoffset = date.getDate() / 7 - 2 + (getToday() >= getFirstDayOfMonth(month, year) ? 1 : 0);
+        this.weekoffset = Math.ceil(weekoffset);
     }
 
     get getMonth() {
@@ -43,7 +43,7 @@ class BigCalendar {
     increaseWeekOffset() {
         this.weekoffset++;
         // check if the weekoffset is greater than the number of weeks in the month
-        if (this.weekoffset > this.getWeeksInMonth) {
+        if (this.weekoffset > this.getWeeksInMonth - 1) {
             this.weekoffset = 0;
             this.month++;
             if (this.month > 11) {
@@ -250,8 +250,21 @@ class BigCalendar {
 
         else if (this.mode == 'w') {
             $('#big-calendar-header-month').html(`W${this.weekoffset+1} ${monthstring} ${this.year}`);
-            $('.big-calendar-body-day').remove();
+            $('#big-calendar-body').remove();
+            $('.big-calendar').append(`
+            <div class="big-calendar-body" id="big-calendar-body">
+                <div class="big-calendar-body-top-day" id="big-calendar-monday">M</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-tuesday">T</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-wednesday">W</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-thursday">T</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-friday">F</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-saturday">S</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-sunday">S</div>
+            </div>
+            `);
             let firstDay = this.getFirstDayOfWeek;
+
+            
             $('#big-calendar-monday').html(`M <div class="big-calendar-body-top-date">${firstDay}/${this.month + 1}</div>`);
             $('#big-calendar-tuesday').html(`T <div class="big-calendar-body-top-date">${firstDay + 1}/${this.month + 1}</div>`);
             $('#big-calendar-wednesday').html(`W <div class="big-calendar-body-top-date">${firstDay + 2}/${this.month + 1}</div>`);
@@ -260,30 +273,65 @@ class BigCalendar {
             $('#big-calendar-saturday').html(`S <div class="big-calendar-body-top-date">${firstDay + 5}/${this.month + 1}</div>`);
             $('#big-calendar-sunday').html(`S <div class="big-calendar-body-top-date">${firstDay + 6}/${this.month + 1}</div>`);
 
-            $('#big-calendar-body').css('grid-template-columns', 'repeat(8, 1fr)');
-            $('#big-calendar-body').css('grid-template-rows', 'auto 1fr');
+            $('#big-calendar-body').css('grid-template-columns', 'auto repeat(7, 1fr)');
+            $('#big-calendar-body').css('grid-template-rows', 'auto repeat(24, 1fr)');
+            $('#big-calendar-body').css('grid-column-gap', '0px');
+            $('#big-calendar-body').css('grid-row-gap', '0');
+
+
             $('#big-calendar-body').prepend(
                 "<div></div>"                
             );
             let html = '';
-            html += "<div class='big-calendar-body-day-hour-wrapper'>";
-            for (let i = 0; i < 24; i++) {
-                html += `<div class="big-calendar-body-hour">${i}</div>`;
-            }
-            html += "</div>";
-            for (let i = 0; i < 7; i++) {
+            //html += "<div class='big-calendar-body-day-hour-wrapper'>";
 
-                html += `
-                <div class="big-calendar-body-day-hour-assignments-wrapper" id="${formatDate(this.year, this.month, firstDay + i)}">`;
-                for (let j = 0; j < 24; j++) {
-                    html += `
-                    <div class="big-calendar-body-day-hour-assignments" id="${formatDate(this.year, this.month, firstDay + i, j, 0)}">
-                        
-                    </div>`;
+            for (let i = 0; i < 24; i++) {
+                html += "<div class='big-calendar-body-day-hour'>" + i + "</div>";
+                let style1 = "";
+                if (i == 0) {
+                    
+                    style1 += "border-top: 1px solid #6c757d; "; 
                 }
-                html += `
-                </div>`;
+                else if (i == 23) {
+                    style1 += "border-bottom: 1px solid #6c757d; ";
+                }
+                for (let j = 0; j < 7; j++) {
+                    let style2 = style1;
+                    if (j == 0) {
+                        style2 += "border-left: 1px solid #6c757d; ";
+                        if (i == 0)
+                            style2 += "border-top-left-radius: 5px; ";
+                        else if (i == 23)
+                            style2 += "border-bottom-left-radius: 5px; ";
+                    }
+                    else if (j == 6) {
+                        style2 += "border-right: 1px solid #6c757d; ";
+                        if (i == 0)
+                            style2 += "border-top-right-radius: 5px; ";
+                        else if (i == 23)
+                            style2 += "border-bottom-right-radius: 5px; ";
+                    }
+                    
+                    
+                    
+                    html += `<div class='big-calendar-body-day-hour-assignments' style="${style2}" id="${i} ${j}"></div>`;
+                }
             }
+            //html += "</div>";
+
+            this.startDay = firstDay;
+            this.startMonth = this.month;
+            this.startYear = this.year;
+            this.endDay = firstDay + 6;
+            if (this.endDay > getDaysInMonth(this.month + 1, this.year)) {
+                this.endDay = getDaysInMonth(this.month + 1, this.year) ;
+            }
+            this.endMonth = this.month + 1;
+            if (this.endMonth > 11) {
+                this.endMonth = 0;
+                this.endYear = this.year + 1;
+            }
+
             $('#big-calendar-body').append(html);
             this.getAssignments();
         }
@@ -402,32 +450,36 @@ $(window).on('load', function () {
         Calendar.setBigCalendar();
     }
     $('#big-calendar-header-left-arrow').on('click', function () {
-        Calendar.setMonth = Calendar.getMonth - 1;
-        if (Calendar.getMonth == 0) {
-            Calendar.setMonth = 12;
-            Calendar.setYear = Calendar.getYear - 1;
+        if (Calendar.mode == 'm') {
+            Calendar.setMonth = Calendar.getMonth - 1;
+            if (Calendar.getMonth == 0) {
+                Calendar.setMonth = 12;
+                Calendar.setYear = Calendar.getYear - 1;
+            }
+            Calendar.setMode = 'm';
+            Calendar.setBigCalendar();
         }
-        Calendar.setMode = 'm';
-        Calendar.setBigCalendar();
+        else if (Calendar.mode == 'w') {
+            Calendar.decreaseWeekOffset();
+            Calendar.setMode = 'w';
+            Calendar.setBigCalendar();
+        }
     });
     $('#big-calendar-header-right-arrow').on('click', function () {
-        Calendar.setMonth = Calendar.getMonth + 1;
-        if (Calendar.getMonth == 13) {
-            Calendar.setMonth = 1;
-            Calendar.setYear = Calendar.getYear + 1;
+        if (Calendar.mode == 'm') {
+            Calendar.setMonth = Calendar.getMonth + 1;
+            if (Calendar.getMonth == 13) {
+                Calendar.setMonth = 1;
+                Calendar.setYear = Calendar.getYear + 1;
+            }
+            Calendar.setMode = 'm';
+            Calendar.setBigCalendar();
         }
-        Calendar.setMode = 'm';
-        Calendar.setBigCalendar();
-    });
-    $('#big-calendar-header-left-arrow-week').on('click', function () {
-        Calendar.decreaseWeekOffset();
-        Calendar.setMode = 'w';
-        Calendar.setBigCalendar();
-    });
-    $('#big-calendar-header-right-arrow-week').on('click', function () {
-        Calendar.increaseWeekOffset();
-        Calendar.setMode = 'w';
-        Calendar.setBigCalendar();
+        else if (Calendar.mode == 'w') {
+            Calendar.increaseWeekOffset();
+            Calendar.setMode = 'w';
+            Calendar.setBigCalendar();
+        }
     });
     $('#big-calendar-header-mode-selector-btn-week').on('click', function () {
         Calendar.setMode = 'w';
