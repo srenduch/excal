@@ -30,13 +30,13 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit"class="submit-btn" id="new-submit-btn">Submit</button>
+                    <button type="submit" class="btn btn-outline-primary" id="delete-submit-btn">Submit</button>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- new modal -->
+
+    <!-- assignment creation modal -->
     <div class="modal" tabindex="-1" role="dialog" id="newModal" data-backdrop="static">
         <div class="modal-dialog" role="document">
             <div class="modal-content" id="newModalBox">
@@ -48,17 +48,17 @@
                     placeholder="Add a title" autocomplete="off"></input>
                 </div>
                 
-                <div class="modal-header custom-header type-select">
-                    <button name="item-type" type="button" class="type-btn a-btn custom-header-item active disableEnter">Assignment</button>
-                    <button name="item-type" type="button" class="type-btn c-btn custom-header-item inactive disableEnter">Class</button>
-                    <button name="item-type" type="button" class="type-btn t-btn custom-header-item inactive disableEnter">Test</button>
+                <div class="modal-header custom-header" id="new-type-select">
+                    <button name="item-type" type="button" class="new-type-btn active custom-header-item" id="a-btn">Assignment</button>
+                    <button name="item-type" type="button" class="new-type-btn inactive custom-header-item" id="c-btn">Class</button>
+                    <button name="item-type" type="button" class="new-type-btn inactive custom-header-item" id="t-btn">Test</button>
                 </div>
 
                 <div class="modal-header assignment" id="new-date">
                     <div class="new-assignment-static">
                         <div id="btnCalendar">
-                            <input class="date-input" id="new-date-input" type="datetime-local" name="date" value="{{ request.form['date'] }}"></input>
-                        </div>
+                        <input class="date-input" id="new-date-input" type="datetime-local" name="date" value="{{ request.form['date'] }}"></input>
+                            </div>
                     </div>
                     <div id="calendar" class="calendar calendar-hidden assignment">
                         <div class="calendar-header" id="calendar-header">
@@ -87,7 +87,7 @@
                 </div>
                 
                 <div class="modal-header assignment" id="new-class-select">
-                    <select name="sub" id="new-choose-class" class="choose-dropdown choose-class disableEnter">
+                    <select name="class" class="choose-dropdown choose-class disableEnter" id="class-select">
                         <option value="" disabled selected hidden>Choose class</option>
                     </select>
                 </div>
@@ -104,7 +104,7 @@
                 </div>
 
                 <div class="modal-footer">
-                    <button type="submit" class="submit-btn">Submit</button>
+                    <button type="submit" class="btn btn-outline-primary" id="new-submit-btn" >Add Assignment</button>
                 </div>
             </div>
         </div>
@@ -131,7 +131,42 @@
         </div>
     </div>
 
-    <div class="items">
+
+    <div class="index-container">
+        <div class="items">
+        </div>
+        
+        <div class="big-calendar">
+            <div class="big-calendar-header" id="big-calendar-header">
+                <div class="big-calendar-header-left">
+                    <div class="big-calendar-header-month" id="big-calendar-header-month"></div>
+                </div>
+                <div class="big-calendar-header-middle">
+                    <div class="big-calendar-header-mode-selector">
+                        <button class="btn btn-dark big-calendar-header-btn" id="big-calendar-header-mode-selector-btn-month" disabled>M</button>
+                        <button class="btn btn-dark big-calendar-header-btn" id="big-calendar-header-mode-selector-btn-week">W</button>
+                        <button class="btn btn-dark big-calendar-header-btn" id="big-calendar-header-mode-selector-btn-year">D</button>
+                    </div>
+                </div>
+                <div class="big-calendar-header-right">
+                    <img src="/static/assets/chevron-left-regular-24.png" class="big-calendar-header-left-arrow" id="big-calendar-header-left-arrow">
+                    <i class="fas fa-chevron-left"></i>
+                    </img>
+                    <img src="/static/assets/chevron-right-regular-24.png" class="big-calendar-header-right-arrow" id="big-calendar-header-right-arrow">
+                    <i class="fas fa-chevron-right"></i>
+                    </img>
+                </div>
+            </div>
+            <div class="big-calendar-body" id="big-calendar-body">
+                <div class="big-calendar-body-top-day" id="big-calendar-monday">M</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-tuesday">T</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-wednesday">W</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-thursday">T</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-friday">F</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-saturday">S</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-sunday">S</div>
+            </div>
+        </div>
     </div>
     <!--  
     {% if tests %}
@@ -144,5 +179,4 @@
         {% endfor %}
     {% endif %}
     -->
-
 {% endblock %}
