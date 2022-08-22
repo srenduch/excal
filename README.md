@@ -1,5 +1,10 @@
 Excal
 ============
+The name ``excal`` is derived from Microsoft's Excel and Google's Google Calendar. This project was created to serve as a seamless bridge between the two, since Excel did not support class scheduling to the extent that Google Calendar did (even though that's not its primary purpose), and Google Calendar did not support test and assignment tracking with features such as conditional formatting, automatic time remaining updaters, etc.
+
+The objective of Excal is to mimic the behavior of Google Calendar in how it displays class items, while adding in the functionality of Excel so that each class instance displays the schedule on which the class recurs, as well as any class assignments and tests, with the ability to add notes, resources, and more.
+
+============
 Building for Linux
 
 Download and install the latest stable versions of ``Python`` and ``pip``. Then navigate to the project root directory.
@@ -9,3 +14,4 @@ If you choose to build a docker image, you can do that by using
 ``docker build .``
 
 The process is similar for Windows and macOS environments.
+
