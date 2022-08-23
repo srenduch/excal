@@ -380,6 +380,7 @@ input[type="color"]::-webkit-color-swatch {
     justify-content: center;
     align-items: center;
     flex-flow: column;
+    max-width: 816px;
 }
 
 
@@ -600,7 +601,19 @@ input[type="color"]::-webkit-color-swatch {
     height: 100%;
 }
 
+.big-calendar-body-week {
+    grid-template-columns: auto repeat(7, 1fr);
+    grid-template-rows: auto repeat(7, auto);
+    grid-column-gap: 0px;
+    grid-row-gap: 0;
+    align-items: start;
+}
 
+.big-calendar-body-day-week-assignment {
+    flex-wrap: wrap;
+    height: 100%;
+    width: 100%;
+}
 
 @media (max-width: 578px) {
     .big-calendar-body-day {

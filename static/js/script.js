@@ -56,6 +56,23 @@ class BigCalendar {
         }
     }
 
+    incrementMonth() {
+        this.month++;
+        if (this.month > 11) {
+            this.month = 0;
+            this.year++;
+        }
+    }
+
+    decrementMonth() {
+        this.month--;
+        if (this.month < 0) {
+            this.month = 11;
+            this.year--;
+        }
+    }
+
+
     decreaseWeekOffset() {
         this.weekoffset--;
         // check if the weekoffset is less than 0
@@ -70,7 +87,7 @@ class BigCalendar {
     }
 
     get getFirstDayOfWeek() {
-        let firstDayOfWeek = this.weekoffset * 7;
+        let firstDayOfWeek = this.weekoffset * 7 + 1;
         return firstDayOfWeek;
     }
 
@@ -128,7 +145,21 @@ class BigCalendar {
             let firstDay = getFirstDayOfMonth(this.month, this.year);
             firstDay = firstDay == 0 ? 7 : firstDay;
             let lastMonthDaysNum = getDaysInMonth(this.month - 1, this.year);
-            $('.big-calendar-body-day').remove();
+
+            $('#big-calendar-body').remove();
+
+            $('.big-calendar').append(`
+            <div class="big-calendar-body" id="big-calendar-body">
+                <div class="big-calendar-body-top-day" id="big-calendar-monday">M</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-tuesday">T</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-wednesday">W</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-thursday">T</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-friday">F</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-saturday">S</div>
+                <div class="big-calendar-body-top-day" id="big-calendar-sunday">S</div>
+            </div>
+            `);
+
 
             let lastMonth = this.month - 1;
             let lastYear = this.year;
@@ -241,44 +272,45 @@ class BigCalendar {
             });
 
 
-            this.getAssignments();
+            if ((localStorage['user_id'] != undefined) && (localStorage['user_id'] != "null")) {
+                this.getAssignments();
+            }
         }
 
         else if (this.mode == 'w') {
             $('#big-calendar-header-month').html(`W${this.weekoffset+1} ${monthstring} ${this.year}`);
             $('#big-calendar-body').remove();
+
+            let dates = this.getWeekDates;
+
             $('.big-calendar').append(`
-            <div class="big-calendar-body" id="big-calendar-body">
-                <div class="big-calendar-body-top-day" id="big-calendar-monday">M</div>
-                <div class="big-calendar-body-top-day" id="big-calendar-tuesday">T</div>
-                <div class="big-calendar-body-top-day" id="big-calendar-wednesday">W</div>
-                <div class="big-calendar-body-top-day" id="big-calendar-thursday">T</div>
-                <div class="big-calendar-body-top-day" id="big-calendar-friday">F</div>
-                <div class="big-calendar-body-top-day" id="big-calendar-saturday">S</div>
-                <div class="big-calendar-body-top-day" id="big-calendar-sunday">S</div>
+            <div class="big-calendar-body big-calendar-body-week" id="big-calendar-body">
+                <div></div>
+                <div class="big-calendar-body-top-day" id="big-calendar-monday">M <div class="big-calendar-body-top-date">   ${dates[0].split('-')[2]}/${dates[0].split('-')[1]}</div></div>
+                <div class="big-calendar-body-top-day" id="big-calendar-tuesday">T <div class="big-calendar-body-top-date">  ${dates[1].split('-')[2]}/${dates[1].split('-')[1]}</div></div>
+                <div class="big-calendar-body-top-day" id="big-calendar-wednesday">W <div class="big-calendar-body-top-date">${dates[2].split('-')[2]}/${dates[2].split('-')[1]}</div></div>
+                <div class="big-calendar-body-top-day" id="big-calendar-thursday">T <div class="big-calendar-body-top-date"> ${dates[3].split('-')[2]}/${dates[3].split('-')[1]}</div></div>
+                <div class="big-calendar-body-top-day" id="big-calendar-friday">F <div class="big-calendar-body-top-date">   ${dates[4].split('-')[2]}/${dates[4].split('-')[1]}</div></div>
+                <div class="big-calendar-body-top-day" id="big-calendar-saturday">S <div class="big-calendar-body-top-date"> ${dates[5].split('-')[2]}/${dates[5].split('-')[1]}</div></div>
+                <div class="big-calendar-body-top-day" id="big-calendar-sunday">S <div class="big-calendar-body-top-date">   ${dates[6].split('-')[2]}/${dates[6].split('-')[1]}</div></div>
+
+                <div></div>
+                <div id="big-calendar-body-assignments-monday" class="big-calendar-body-assignments-day"></div>
+                <div id="big-calendar-body-assignments-tuesday" class="big-calendar-body-assignments-day"></div>
+                <div id="big-calendar-body-assignments-wednesday" class="big-calendar-body-assignments-day"></div>
+                <div id="big-calendar-body-assignments-thursday" class="big-calendar-body-assignments-day"></div>
+                <div id="big-calendar-body-assignments-friday" class="big-calendar-body-assignments-day"></div>
+                <div id="big-calendar-body-assignments-saturday" class="big-calendar-body-assignments-day"></div>
+                <div id="big-calendar-body-assignments-sunday" class="big-calendar-body-assignments-day"></div>
+
             </div>
+
             `);
 
             let firstDay = this.getFirstDayOfWeek;
 
-            
-            $('#big-calendar-monday').html(`M <div class="big-calendar-body-top-date">${firstDay}/${this.month + 1}</div>`);
-            $('#big-calendar-tuesday').html(`T <div class="big-calendar-body-top-date">${firstDay + 1}/${this.month + 1}</div>`);
-            $('#big-calendar-wednesday').html(`W <div class="big-calendar-body-top-date">${firstDay + 2}/${this.month + 1}</div>`);
-            $('#big-calendar-thursday').html(`T <div class="big-calendar-body-top-date">${firstDay + 3}/${this.month + 1}</div>`);
-            $('#big-calendar-friday').html(`F <div class="big-calendar-body-top-date">${firstDay + 4}/${this.month + 1}</div>`);
-            $('#big-calendar-saturday').html(`S <div class="big-calendar-body-top-date">${firstDay + 5}/${this.month + 1}</div>`);
-            $('#big-calendar-sunday').html(`S <div class="big-calendar-body-top-date">${firstDay + 6}/${this.month + 1}</div>`);
 
-            $('#big-calendar-body').css('grid-template-columns', 'auto repeat(7, 1fr)');
-            $('#big-calendar-body').css('grid-template-rows', 'auto repeat(24, 1fr)');
-            $('#big-calendar-body').css('grid-column-gap', '0px');
-            $('#big-calendar-body').css('grid-row-gap', '0');
-
-
-            $('#big-calendar-body').prepend(
-                "<div></div>"
-            );
+            // this could probably done in css but it would also be more work
             let html = '';
             //html += "<div class='big-calendar-body-day-hour-wrapper'>";
 
@@ -311,7 +343,7 @@ class BigCalendar {
                     
                     
                     
-                    html += `<div class='big-calendar-body-day-hour-assignments' style="${style2}" id="${i} ${j}"></div>`;
+                    html += `<div class='big-calendar-body-day-hour-assignments' style="${style2}" id="${i}-${j}"></div>`;
                 }
             }
             //html += "</div>";
@@ -319,18 +351,31 @@ class BigCalendar {
             this.startDay = firstDay;
             this.startMonth = this.month;
             this.startYear = this.year;
+
             this.endDay = firstDay + 6;
             if (this.endDay > getDaysInMonth(this.month + 1, this.year)) {
-                this.endDay = getDaysInMonth(this.month + 1, this.year) ;
+                this.endMonth = this.month + 1;
+                this.endDay = this.endDay - getDaysInMonth(this.month + 1, this.year);
+                if (this.endMonth > 11) {
+                    this.endMonth = 0;
+                    this.endYear = this.year + 1;
+                }
+                else {
+                    this.endYear = this.year;
+                }
             }
-            this.endMonth = this.month + 1;
-            if (this.endMonth > 11) {
-                this.endMonth = 0;
-                this.endYear = this.year + 1;
+            else {
+                this.endMonth = this.month;
+                this.endYear = this.year;
             }
 
             $('#big-calendar-body').append(html);
-            this.getAssignments();
+
+
+
+            if ((localStorage['user_id'] != undefined) && (localStorage['user_id'] != "null")) {
+                this.getAssignments();
+            }
         }
     }
 
@@ -361,38 +406,124 @@ class BigCalendar {
         return this.endYear;
     }
 
+    get getWeekDates() {
+        let dates = [];
+        for (let i = 0; i < 7; i++) {
+            if (this.startDay + i > getDaysInMonth(this.startMonth + 1, this.startYear)) {
+                if (this.startMonth + 1 > 11) {
+                    dates.push(formatDate(this.startYear + 1, this.startMonth + 1 - 12, this.startDay + i - getDaysInMonth(this.startMonth + 1, this.startYear)));
+                }
+                else
+                    dates.push(formatDate(this.startYear, this.startMonth + 1, this.startDay + i - getDaysInMonth(this.startMonth + 1, this.startYear)));
+            }
+            else 
+                dates.push(formatDate(this.year, this.month, this.startDay + i));
+        }
+        return dates;  
+    }
+
     addAssignmentsToCalendar(assignments) {
-        let start = new Date(this.getStartDate);
-        let end = new Date(this.getEndDate);
-        assignments = eval(assignments)
-        assignments.forEach(element => {
-            let assignmentDate = new Date(element['date']);
-            let day = assignmentDate.getDate() + 1;
-            let month = assignmentDate.getMonth() + 1;
-            let year = assignmentDate.getFullYear();
-            let id = formatDate(year, month, day);
-            let color = element['color']
+        if (this.mode == 'm') {
+            $("body").append(`
+                <div class="big-calendar-body-day-assignment"></div>
+            `);
+            let style = $('.big-calendar-body-day-assignment');
+            let assignment_name_max_length = style.css("width").replace('px', '') / style.css("fontSize").replace('px', '');
 
-            $('#' + id).children('.big-calendar-body-day-assignments').append(`<div class="big-calendar-body-day-assignment" style="background-color: ${color}">${element['a_name']}</div>`);
+            assignments = eval(assignments) // wtf copilot
+            assignments.forEach(element => {
+                let assignmentDate = new Date(element['date']);
+                let day = assignmentDate.getDate();
+                let month = assignmentDate.getMonth() + 1;
+                let year = assignmentDate.getFullYear();
+                let id = formatDate(year, month, day);
+                let color = element['color']
+                
+                let assignment_name = element['a_name'].length > assignment_name_max_length ? element['a_name'].substring(0, assignment_name_max_length) + '...' : element['a_name'];
 
-            let r = parseInt(color.substring(1, 3), 16);
-            let g = parseInt(color.substring(3, 5), 16);
-            let b = parseInt(color.substring(5, 7), 16);
-            let brightness = (r * 299 + g * 587 + b * 114) / 1000;
-            if (brightness < 125) {
-                $('#' + id).children('.big-calendar-body-day-assignments').children('.big-calendar-body-day-assignment').css('color', 'white');
-            }
-            else {
-                $('#' + id).children('.big-calendar-body-day-assignments').children('.big-calendar-body-day-assignment').css('color', 'black');
-            }
-        });
+                $('#' + id).children('.big-calendar-body-day-assignments').append(`<div class="big-calendar-body-day-assignment" style="background-color: ${color}">${assignment_name}</div>`);
+
+                let r = parseInt(color.substring(1, 3), 16);
+                let g = parseInt(color.substring(3, 5), 16);
+                let b = parseInt(color.substring(5, 7), 16);
+                let brightness = (r * 299 + g * 587 + b * 114) / 1000; 
+                if (brightness < 125) {
+                    $('#' + id).children('.big-calendar-body-day-assignments').children('.big-calendar-body-day-assignment').css('color', 'white');
+                }
+                else {
+                    $('#' + id).children('.big-calendar-body-day-assignments').children('.big-calendar-body-day-assignment').css('color', 'black');
+                }
+            });
+        }
+        else if (this.mode == 'w') {
+            $("body").append(`
+                <div class="big-calendar-body-day-assignment big-calendar-body-day-week-assignment"></div>
+            `);
+
+            let style = $('.big-calendar-body-day-week-assignment');
+            let assignment_name_max_length = style.css("width").replace('px', '') / style.css("fontSize").replace('px', '');
+
+
+            assignments = eval(assignments) // wtf copilot
+            assignments.forEach(element => {
+                let assignmentDate = new Date(element['date']);
+                let day = assignmentDate.getDate();
+                let month = assignmentDate.getMonth() + 1;
+                let year = assignmentDate.getFullYear();
+                let color = element['color']
+                let time = element['time'];
+                let assignment_name = element['a_name'].length > assignment_name_max_length ? element['a_name'].substring(0, assignment_name_max_length) + '...' : element['a_name'];
+                
+
+
+
+                let dayOfWeek = assignmentDate.getDay();
+                //console.log(time);
+
+                let r = parseInt(color.substring(1, 3), 16);
+                let g = parseInt(color.substring(3, 5), 16);
+                let b = parseInt(color.substring(5, 7), 16);
+                let brightness = (r * 299 + g * 587 + b * 114) / 1000; 
+
+                //console.log(`#${hourOfDay}-${dayOfWeek}`);
+                let sel;
+                switch (dayOfWeek) {
+                    case 1:
+                        sel = $('#big-calendar-body-assignments-monday');
+                        break;
+                    case 2:
+                        sel = $('#big-calendar-body-assignments-tuesday');
+                        break;
+                    case 3:
+                        sel = $('#big-calendar-body-assignments-wednesday');
+                        break;
+                    case 4:
+                        sel = $('#big-calendar-body-assignments-thursday');
+                        break;
+                    case 5:
+                        sel = $('#big-calendar-body-assignments-friday');
+                        break;
+                    case 6:
+                        sel = $('#big-calendar-body-assignments-saturday');
+                        break;
+                    case 0:
+                        sel = $('#big-calendar-body-assignments-sunday');
+                        break;
+                }
+                sel.append(`<div class="big-calendar-body-day-assignment big-calendar-body-day-week-assignment" style="background-color: ${color}; color: ${brightness < 125 ? 'white' : 'black'} ">${assignment_name}</div>`);
+                
+            });
+        }
     }
 
     getAssignments() {
+        console.log(this.getStartDate);
+        console.log(this.getEndDate);
         db.getAssignmentDateRange(
             Calendar.getStartDate,
             Calendar.getEndDate
         ).then((data) => {
+            //console.log(data);
             Calendar.addAssignmentsToCalendar(data, this.mode);
         });
     }
@@ -402,9 +533,9 @@ class BigCalendar {
     }
 }
 
+// kinda cursed should make a class for the small calendar 
 var month = new Date().getMonth() + 1;
 var year = new Date().getFullYear();
-var day = new Date().getDate();
 
 var Calendar = new BigCalendar(month, year, 'm');
 
@@ -417,12 +548,14 @@ function formatDate(year, month, day, hour, minute) {
 
 
 $(window).on('load', function () {
-    fetchAssignments('all', null).then((data) => {
-        $('.items').html(data);
-        setTimeout(function () {
-            slideElement($('.item'), 'right');
-        }, 100)
-    })
+    if (localStorage['user_id'] != undefined && localStorage['user_id'] != null) {
+        fetchAssignments('all', null).then((data) => {
+            $('.items').html(data);
+            setTimeout(function () {
+                slideElement($('.item'), 'right');
+            }, 100)
+        });
+    }
     $('#new-color').on('input', function () {
         let color = $('#new-color').val();
         $('#new-color').css('background-color', color);
@@ -439,33 +572,21 @@ $(window).on('load', function () {
     }
     $('#big-calendar-header-left-arrow').on('click', function () {
         if (Calendar.mode == 'm') {
-            Calendar.setMonth = Calendar.getMonth - 1;
-            if (Calendar.getMonth == 0) {
-                Calendar.setMonth = 12;
-                Calendar.setYear = Calendar.getYear - 1;
-            }
-            Calendar.setMode = 'm';
+            Calendar.decrementMonth();
             Calendar.setBigCalendar();
         }
         else if (Calendar.mode == 'w') {
             Calendar.decreaseWeekOffset();
-            Calendar.setMode = 'w';
             Calendar.setBigCalendar();
         }
     });
     $('#big-calendar-header-right-arrow').on('click', function () {
         if (Calendar.mode == 'm') {
-            Calendar.setMonth = Calendar.getMonth + 1;
-            if (Calendar.getMonth == 13) {
-                Calendar.setMonth = 1;
-                Calendar.setYear = Calendar.getYear + 1;
-            }
-            Calendar.setMode = 'm';
+            Calendar.incrementMonth();
             Calendar.setBigCalendar();
         }
         else if (Calendar.mode == 'w') {
             Calendar.increaseWeekOffset();
-            Calendar.setMode = 'w';
             Calendar.setBigCalendar();
         }
     });
@@ -812,16 +933,6 @@ function setCalendar(month, year) {
 
 
 
-$("#big-calendar-header-right-arrow").click(function () {
-    if (month == 12) {
-        month = 1;
-        year = year + 1;
-    }
-    else {
-        month = month + 1;
-    }
-    setCalendar(month, year);
-});
 
 
 
