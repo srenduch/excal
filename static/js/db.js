@@ -92,7 +92,22 @@ export class DBInterface {
         return result;
     }
 
-    async getAssignmentForClass(class_id) { }
+    async getAssignmentForClass(class_id) {
+        const result = await $.ajax({
+            url: '/get-assignments-for-class',
+            type: 'GET',
+            data: {
+                user_id: localStorage['user_id'],
+                class_id: class_id
+            },
+            success: function (data) {
+            },
+            error: function (data) {
+                console.error(data);
+            }
+        });
+        return result;
+    }
 
     async getAssignmentDateRange(start, end) {
         const result = await $.ajax({

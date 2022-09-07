@@ -101,15 +101,16 @@
     justify-content: space-between;
 }
 
-#edit {
+.edit {
     background: url(/static/assets/edit_icon.png) no-repeat;
 }
 
-#delete {
+.delete {
     background: url(/static/assets/delete_icon.png) no-repeat;
 }
 
-.item-btn {
+.delete-btn,
+.edit-btn {
     align-self: center;
     width: 30px;
     height: 30px;
@@ -618,4 +619,3 @@ input[type="color"]::-webkit-color-swatch {
         padding-bottom: 10px;
     }
 }
-

@@ -63,8 +63,8 @@ def get_assignments() :
         html_str += f'<div class="display-container top">'
         html_str += f'<h3>{a["a_name"]}</h3>'
         html_str += "<div>"
-        html_str += '<button class="item-btn" id="edit"></button>'
-        html_str += f'<button type="button" data-id="{a["id"]}" data-name="{a["a_name"]}" class="item-btn" data-toggle="modal" data-target="#deleteModal" id="delete"></button>'
+        html_str += f'<button type="button" data-id="{a["id"]}" data-name="{a["a_name"]}" class="edit edit-btn"></button>'
+        html_str += f'<button type="button" data-id="{a["id"]}" data-name="{a["a_name"]}" class="delete delete-btn"></button>'
         html_str += "</div>"
         html_str += "</div>"
         html_str += '<div class="display-container">'
@@ -84,6 +84,18 @@ def get_assignments() :
 
     return html_str
 
+
+@app.route('/get-assignments-for-class', methods=['GET'])
+def get_assignments_for_class() :
+    user_id = request.args.get('user_id')
+    class_id = request.args.get('class_id')
+
+    assignment_list = db.get_assignment_for_class(user_id, class_id)
+
+    html_str = ''
+    for a in assignment_list :
+        html_str += f"<option data-assignment-id={a['id']} data-parent-class={a['class_id']} style=\"color: black;\" value=\"{a['a_name']}\">{a['a_name']}</option>\n"
+    return html_str 
 
 @app.route('/get-classes', methods=['GET'])
 def get_classes() :

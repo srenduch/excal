@@ -1,5 +1,14 @@
 import { DBInterface } from './db.js';
+
 let db = new DBInterface();
+let modal = false
+
+let month = new Date().getMonth() + 1;
+let year = new Date().getFullYear();
+let day = new Date().getDate();
+
+let assignments_cached = false;
+let classes_cached = false;
 
 function getToday() {
     let date = new Date();
@@ -353,10 +362,6 @@ class BigCalendar {
     }
 }
 
-var month = new Date().getMonth() + 1;
-var year = new Date().getFullYear();
-var day = new Date().getDate();
-
 var Calendar = new BigCalendar(month, year, 'm');
 
 function formatDate(year, month, day, hour, minute) {
@@ -454,7 +459,7 @@ function deleteAssignments(num_delete, assignment_id) {
 
 }
 
-$(document).on("click", ".item-btn", function () {
+$(document).on("click", ".delete-btn", function () {
     var assignment_id = $(this).data("id");
     var assignment_name = $(this).data("name");
 
@@ -475,10 +480,9 @@ $(document).on("click", ".item-btn", function () {
 
 // function deleteAssignment(assignment_id, assignment_name) {
 //     $('.items').toggleClass('base-inactive'); // see above, causes bug when modal is closed
-// }
 
 function displayDeleteModal() {
-    if ($('.modal').find(':visible'))
+    if (modal)
         return;
 
     $('#deleteModal').modal({
@@ -487,6 +491,33 @@ function displayDeleteModal() {
         focus: true,
         show: true
     });
+
+    // if (!classes_cached) {
+    //     db.getClassAll().then((data) => {
+    //         localStorage['classes'] = data;
+    //         $('.class-select').html(localStorage['classes'])
+    //     })
+    //     classes_cached = true;
+    // }
+    // else {
+    //     $('.class-select').html(localStorage['classes']);
+    // }
+
+    // if (!assignments_cached) {
+    //     db.getAssignmentForClass().then((data) => {
+    //         localStorage['assignments'] = data;
+    //         $('.assignment-select').html(localStorage['assignments'])
+    //     })
+    //     assignments_cached = true;
+    // }
+    // else {
+    //     $('.class-select').html(localStorage['classes']);
+    // }
+
+    // let class_id = $('#delete-choose-class').find(":selected").data('class-id');
+    // db.getAssignmentForClass(class_id).then((data) => {
+    //     $('.assignment-select').html(data);
+    // })
 }
 
 // changes the text of #new-submit-btn depending on the type of item being created
@@ -503,20 +534,7 @@ $(document).ready(function () {
 });
 
 $('#newModal').on('show.bs.modal', function () {
-    // $('#newModal').on('show.bs.modal', function () {
-    //     if (previous_modal_id != $(this)[0].id) {
-    //         $('.type-btn').addClass('inactive').removeClass('active')
-    //         $('.a-btn').addClass('active').removeClass('inactive')
-    //         $('.assignment').show()
-    //     }
-    //     else {
-    //         $('type-btn').toggleClass('active');
-    //     }
-    // });
-
-    if ($('.modal').find(':visible'))
-        return;
-
+    modal = true;
     $('.items').addClass('base-inactive');
     $('.index-container').addClass('base-inactive');
 
@@ -539,71 +557,51 @@ $('#newModal').on('show.bs.modal', function () {
     if (!classes_cached) {
         db.getClassAll().then((data) => {
             localStorage['classes'] = data
-            $('#class-select').html(localStorage['classes'])
+            $('.class-select').html(localStorage['classes'])
         })
         classes_cached = true;
     }
     else
-        $('#class-select').html(localStorage['classes']);
+        $('.class-select').html(localStorage['classes']);
 });
 
 $('#newModal').on('hidden.bs.modal', function () {
     $('.items').removeClass('base-inactive');
     $('.index-container').removeClass('base-inactive');
+    modal = false;
 });
 
 $('#deleteModal').on('show.bs.modal', function () {
-    // let open = false;
-    // let previous_modal_id = null;
-    // $('#deleteModal').on('show.bs.modal', function () {
-    //     if (open) {
-    //         return
-    //     }
-    //     open = true;
-
-    //     $('.items').addClass('base-inactive')
-    //     if (previous_modal_id != $(this)[0].id) {
-    //         $('.type-btn').addClass('inactive').removeClass('active')
-    //         $('.a-btn').addClass('active').removeClass('inactive')
-    //         $('.assignment').show()
-    //     }
-    //     else {
-    //         $('type-btn').toggleClass('active');
-    //     }
-
+    modal = true;
     setTimeout(function () {
         $('#delete-title').focus();
     }, 300);
 
-    fetchClasses()
-    // });
+    if (!classes_cached) {
+        db.getClassAll().then((data) => {
+            localStorage['classes'] = data;
+            $('.class-select').html(localStorage['classes'])
+        })
+        classes_cached = true;
+    }
+    else {
+        $('.class-select').html(localStorage['classes']);
+    }
 
-    // if (open) {
-    //     return
-    // }
-    // open = true;
-
-    // $('.items').addClass('base-inactive')
-    // if (previous_modal_id != $(this)[0].id) {
-    //     $('.type-btn').addClass('inactive').removeClass('active')
-    //     $('.a-btn').addClass('active').removeClass('inactive')
-    //     $('.assignment').show()
-    // }
-    // else {
-    //     $('type-btn').toggleClass('active');
-    // }
-
-    // setTimeout(function () {
-    //     $('#delete-title').focus();
-    // }, 300);
-
-    // fetchClasses()
+    let class_id = $('#delete-choose-class').find(":selected").data('class-id');
+    db.getAssignmentForClass(class_id).then((data) => {
+        $('.assignment-select').html(data);
+    })
 });
 
-var classes_cached = false;
+$('#deleteModal').on('hidden.bs.modal', function () {
+    $('.items').removeClass('base-inactive');
+    $('.index-container').removeClass('base-inactive');
+    modal = false;
+});
 
 function displayNewModal(dateOverride) {
-    if ($('.modal').find(':visible'))
+    if (modal)
         return;
 
     $('#newModal').modal({
@@ -629,15 +627,16 @@ function displayNewModal(dateOverride) {
         $('#new-date-input').val(dateOverride);
     }
 
-    if (!classes_cached) {
-        db.getClassAll().then((data) => {
-            localStorage['classes'] = data;
-            $('#class-select').html(localStorage['classes'])
-        })
-        classes_cached = true;
-    }
-    else
-        $('#class-select').html(localStorage['classes']);
+    // if (!classes_cached) {
+    //     db.getClassAll().then((data) => {
+    //         localStorage['classes'] = data;
+    //         $('.class-select').html(localStorage['classes'])
+    //     })
+    //     classes_cached = true;
+    // }
+    // else {
+    //     $('.class-select').html(localStorage['classes']);
+    // }
 }
 
 $(document).on('keydown', document, async function (e) {
@@ -797,7 +796,7 @@ $(document).on('click', '.new-type-btn', function () {
             });
             classes_cached = true;
         }
-        $('#class-select').html(localStorage['classes']);
+        $('.class-select').html(localStorage['classes']);
     }
     else {
         $('.cls').hide();
@@ -806,9 +805,6 @@ $(document).on('click', '.new-type-btn', function () {
     }
 });
 
-var month = new Date().getMonth() + 1;
-var year = new Date().getFullYear();
-var day = new Date().getDate();
 $(document).on('click', '#btnCalendar', function (e) {
     // toggles calendar
     let calendar = $('#calendar');
@@ -903,17 +899,6 @@ function setCalendar(month, year) {
         }
     }
 }
-
-$("#big-calendar-header-right-arrow").click(function () {
-    if (month == 12) {
-        month = 1;
-        year = year + 1;
-    }
-    else {
-        month = month + 1;
-    }
-    setCalendar(month, year);
-});
 
 $(document).on('click', ".calendar-body-day", function (e) {
     if (!$(this).hasClass('calendar-body-day-disabled')) {
