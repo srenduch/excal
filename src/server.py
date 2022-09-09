@@ -5,6 +5,8 @@ from flask import Flask, render_template, request, Response
 from http import HTTPStatus as status
 import json
 
+import datetime
+
 from db import *
 from handlers import *
 
@@ -208,6 +210,88 @@ def get_assignments_between_dates() :
         assignments[i]['color'] = cl['color']
     return Response(json.dumps(assignments), status=status.OK)
 
+@app.route('/new-class-item')
+def new_class_item() :
+    user_id     = request.args.get('user_id')
+    class_id    = request.args.get('class_id')
+    class_type  = request.args.get('class_type')
+    start_time  = request.args.get('start_time')
+    end_time    = request.args.get('end_time')
+    date        = request.args.get('date')
+    repeat_mode = request.args.get('repeat_mode')
+    repeat_days = request.args.get('repeat_days')
+    repeat_end  = request.args.get('repeat_end')
+    prof_name   = request.args.get('prof_name')
+    location    = request.args.get('location')
+    description = request.args.get('description')
+    
+    db.add_class_item(user_id, class_id, class_type, start_time, end_time, date, repeat_mode, repeat_days, repeat_end, prof_name, location, description)
+    
+    return Response(status=status.OK)
+
+@app.route('/get-class-items')
+def get_class_items() :
+    class_id = request.args.get('class_id')
+    class_items = db.get_class_items(class_id)
+    return Response(json.dumps(class_items), status=status.OK)
+
+@app.route('/get-class-items-repeating')
+def get_class_items_repeating() :
+    class_id = request.args.get('class_id')
+    class_items = db.get_class_items_repeating(class_id)
+    return Response(json.dumps(class_items), status=status.OK)
+
+@app.route('/get-class-items-between-dates')
+def get_class_items_between_dates() :
+    # get both repeating and non-repeating class items between dates
+    class_id = request.args.get('class_id')
+    start = request.args.get('start')
+    end = request.args.get('end')
+    class_items = db.get_class_items_between_dates(class_id, start, end)
+    class_items_repeating = db.get_class_items_repeating(class_id)
+    
+    # check if the repeating class items are within the date range
+    for item in class_items_repeating :
+        date = datetime.date(item['date'])
+        date_end = datetime.date(end)
+        date_start = datetime.date(start)
+        repeat_end_date = datetime.date(item['repeat_end'])
+        while date < date_end and date < repeat_end_date:
+            if date >= date_start :
+                class_items.append(item)
+            match item['repeat_mode'] :
+                case 1 : # daily
+                    date += datetime.timedelta(days=1)
+                case 2 : # weekly
+                    date += datetime.timedelta(days=7)
+                case 3 : # monthly
+                    date += datetime.timedelta(days=30)
+                case 4 : # custom
+                    date += datetime.timedelta(days=item['repeat_days'])
+        
+    return Response(json.dumps(class_items), status=status.OK)
+
+
+@app.route('/delete-class-item')
+def delete_class_item() :
+    selector = request.args.get('selector')
+    if selector == 'one':
+        class_item_id = request.args.get('class_item_id')
+        db.delete_class_item_one(class_item_id)
+        return Response(status=status.OK)
+    elif selector == 'all':
+        class_id = request.args.get('class_id')
+        db.delete_class_item_all(class_id)
+        return Response(status=status.OK)
+    else:
+        return Response(status=status.BAD_REQUEST)
+        
+@app.route('/cut-repeating-class-item-at-date')
+def cut_repeating_class_item_at_date() :
+    class_item_id = request.args.get('class_item_id')
+    date = request.args.get('date')
+    db.cut_repeating_class_item_at_date(class_item_id, date)
+    return Response(status=status.OK)
 
 # if __name__ == "__main__" :
     # app.jinja_env.auto_reload = True

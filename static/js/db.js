@@ -257,4 +257,133 @@ export class DBInterface {
         });
         return result;
     }
+
+    async createClassItem(class_id, class_type, start_time, end_time, date, repeat_mode, repeat_days, repeat_end, prof_name, location, description) {
+        const result = await $.ajax({
+            url: '/new-class-item',
+            type: 'POST',
+            data: {
+                class_id: class_id,
+                class_type: class_type,
+                start_time: start_time,
+                end_time: end_time,
+                date: date,
+                repeat_mode: repeat_mode,
+                repeat_days: repeat_days,
+                repeat_end: repeat_end,
+                prof_name: prof_name,
+                location: location,
+                description: description,
+            },
+            success: function (data) {
+            },
+            error: function (data) {
+                console.error(data);
+            }
+        });
+        return result;
+    }
+
+    async getClassItems(class_id) {
+        const result = await $.ajax({
+            url: '/get-class-items',
+            type: 'GET',
+            data: {
+                class_id: class_id,
+            },
+            success: function (data) {
+            },
+            error: function (data) {
+                console.error(data);
+            }
+        });
+        return result;
+    }
+
+    async getClassItemsRepeating(class_id) {
+        const result = await $.ajax({
+            url: '/get-class-items-repeating',
+            type: 'GET',
+            data: {
+                class_id: class_id,
+            },
+            success: function (data) {
+            },
+            error: function (data) {
+                console.error(data);
+            }
+        });
+        return result;
+    }
+    
+    async getClassItemsBetweenDates(class_id, start, end) {
+        const result = await $.ajax({
+            url: '/get-class-items-between-dates',
+            type: 'GET',
+            data: {
+                class_id: class_id,
+                start: start,
+                end: end,
+            },
+            success: function (data) {
+            },
+            error: function (data) {
+                console.error(data);
+            }
+        });
+        return result;
+    }
+
+    async deleteClassItemOne(class_item_id) {
+        const result = await $.ajax({
+            url: '/delete-class-item',
+            type: 'POST',
+            data: {
+                class_id: null,
+                class_item_id: class_item_id,
+                selector: 'one',
+            },
+            success: function (data) {
+            },
+            error: function (data) {
+                console.error(data);
+            }
+        });
+        return result;
+    }
+
+    async deleteClassItemAll(class_id) {
+        const result = await $.ajax({
+            url: '/delete-class-item',
+            type: 'POST',
+            data: {
+                class_id: class_id,
+                class_item_id: null,
+                selector: 'all',
+            },
+            success: function (data) {
+            },
+            error: function (data) {
+                console.error(data);
+            }
+        });
+        return result;
+    }
+
+    async CutRepeatingClassItemAtDate(class_item_id, date) {
+        const result = await $.ajax({
+            url: '/cut-repeating-class-item-at-date',
+            type: 'POST',
+            data: {
+                class_item_id: class_item_id,
+                date: date,
+            },
+            success: function (data) {
+            },
+            error: function (data) {
+                console.error(data);
+            }
+        });
+        return result;
+    }
 }

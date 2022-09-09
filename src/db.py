@@ -266,6 +266,55 @@ class DBInterface() :
         self.__execute_query(query)
         self.__save_db()
 
+
+    ###################
+    #  Class Item Adders
+    ###################
+    
+    def add_class_item(self, class_id, class_type, start_time, end_time, date, repeat_mode, repeat_days, repeat_end, prof_name, location, description):
+        query = f"INSERT INTO class_items (class_id, class_type, start_time, end_time, date, repeat_mode, repeat_days, repeat_end, prof_name, location, description) VALUES ({class_id}, '{class_type}', '{start_time}', '{end_time}', '{date}', '{repeat_mode}', '{repeat_days}', '{repeat_end}', '{prof_name}', '{location}', '{description}')"
+        self.__execute_query(query)
+        self.__save_db()
+
+    ###################
+    #  Class Item Getters
+    ###################
+    
+    def get_class_items(self, class_id):
+        query = f"SELECT * FROM class_items WHERE class_id = {class_id}"
+        return self.__get_item(query)
+
+    def get_class_items_repeating(self, class_id):
+        query = f"SELECT * FROM class_items WHERE class_id = {class_id} AND repeat_mode != 0"
+        return self.__get_item(query)
+    
+    def get_class_items_between_dates(self, class_id, start_date, end_date):
+        query = f"SELECT * FROM class_items WHERE class_id = {class_id} AND date BETWEEN '{start_date}' AND '{end_date}'"
+        return self.__get_item(query)
+    
+    ###################
+    #  Class Item Deleters
+    ###################
+    
+    def delete_class_item_one(self, class_item_id):
+        query = f"DELETE FROM class_items WHERE id = {class_item_id}"
+        self.__execute_query(query)
+        self.__save_db()
+
+    def delete_class_item_all(self, class_id):
+        query = f"DELETE FROM class_items WHERE class_id = {class_id}"
+        self.__execute_query(query)
+        self.__save_db()
+        
+    ###################
+    #  Class Item Modifiers
+    ###################
+    
+    def cut_repeating_class_item_at_date(self, class_item_id, date):
+        query = f"UPDATE class_items SET repeat_end = '{date}' WHERE id = {class_item_id}"
+        self.__execute_query(query)
+        self.__save_db()
+    
     """
     Nuke the database.
     """

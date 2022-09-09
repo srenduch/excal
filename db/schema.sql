@@ -31,6 +31,50 @@ CREATE TABLE IF NOT EXISTS classes (
     ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS class_item (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    class_id INTEGER NOT NULL,
+    start_time VARCHAR(5) NOT NULL, /* HH:MM fuck seconds*/
+    end_time VARCHAR(5) NOT NULL,
+    date DATE NOT NULL,
+    repeat_mode TINYINT NOT NULL, /* 
+        sets the repeat mode for the class item
+        0 = no repeat
+        1 = daily
+        2 = weekly
+        3 = monthly
+        4 = custom number of days (set in repeatdays)
+    */
+    repeat_days INTEGER, /* 
+        sets the number of days to repeat the class item
+        if repeatmode is 4
+    */
+
+    repeat_end DATE, /* 
+        sets the end date for the class item
+        if repeatmode is not 0
+    */
+
+    prof_name TEXT NOT NULL,
+
+    type TEXT NOT NULL,
+
+    location TEXT NOT NULL,
+
+    description TEXT NOT NULL,
+
+    FOREIGN KEY (class_id) REFERENCES classes(id)
+    ON DELETE CASCADE
+)
+
+CREATE TABLE IF NOT EXISTS class_item_exclude (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    class_item_id INTEGER NOT NULL,
+    date DATE NOT NULL,
+    FOREIGN KEY (class_item_id) REFERENCES class_item(id)
+    ON DELETE CASCADE
+)
+
 CREATE TABLE IF NOT EXISTS tests (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     owner_id INTEGER NOT NULL,
