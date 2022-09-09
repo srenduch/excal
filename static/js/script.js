@@ -8,7 +8,6 @@ let year = new Date().getFullYear();
 let day = new Date().getDate();
 
 let assignments_cached = false;
-let classes_cached = false;
 
 function getToday() {
     let date = new Date();
@@ -492,22 +491,15 @@ function displayDeleteModal() {
         show: true
     });
 
-    // if (!classes_cached) {
-    //     db.getClassAll().then((data) => {
-    //         localStorage['classes'] = data;
-    //         $('.class-select').html(localStorage['classes'])
-    //     })
-    //     classes_cached = true;
-    // }
-    // else {
-    //     $('.class-select').html(localStorage['classes']);
-    // }
-
+    db.getAssignmentForClass().then((data) => {
+        localStorage['assignments'] = data;
+        $('.assignment-select').html(localStorage['assignments'])
+    })
     // if (!assignments_cached) {
-    //     db.getAssignmentForClass().then((data) => {
-    //         localStorage['assignments'] = data;
-    //         $('.assignment-select').html(localStorage['assignments'])
-    //     })
+    // db.getAssignmentForClass().then((data) => {
+    //     localStorage['assignments'] = data;
+    //     $('.assignment-select').html(localStorage['assignments'])
+    // })
     //     assignments_cached = true;
     // }
     // else {
@@ -554,15 +546,13 @@ $('#newModal').on('show.bs.modal', function () {
         $('#new-title').focus();
     }, 300);
 
-    if (!classes_cached) {
-        db.getClassAll().then((data) => {
-            localStorage['classes'] = data
-            $('.class-select').html(localStorage['classes'])
-        })
-        classes_cached = true;
-    }
-    else
-        $('.class-select').html(localStorage['classes']);
+    db.getClassAll().then((data) => {
+        let html_str = ``
+        JSON.parse(data).forEach(element => {
+            html_str += `<option style="color: black;" data-class-id="${element['id']}">${element['title']}</option>`;
+        });
+        $('.class-select').html(html_str);
+    })
 });
 
 $('#newModal').on('hidden.bs.modal', function () {
@@ -577,16 +567,13 @@ $('#deleteModal').on('show.bs.modal', function () {
         $('#delete-title').focus();
     }, 300);
 
-    if (!classes_cached) {
-        db.getClassAll().then((data) => {
-            localStorage['classes'] = data;
-            $('.class-select').html(localStorage['classes'])
-        })
-        classes_cached = true;
-    }
-    else {
-        $('.class-select').html(localStorage['classes']);
-    }
+    db.getClassAll().then((data) => {
+        let html_str = ``
+        JSON.parse(data).forEach(element => {
+            html_str += `<option style="color: black;" data-class-id="${element['id']}">${element['title']}</option>`;
+        });
+        $('.class-select').html(html_str);
+    })
 
     let class_id = $('#delete-choose-class').find(":selected").data('class-id');
     db.getAssignmentForClass(class_id).then((data) => {
@@ -626,17 +613,6 @@ function displayNewModal(dateOverride) {
     else {
         $('#new-date-input').val(dateOverride);
     }
-
-    // if (!classes_cached) {
-    //     db.getClassAll().then((data) => {
-    //         localStorage['classes'] = data;
-    //         $('.class-select').html(localStorage['classes'])
-    //     })
-    //     classes_cached = true;
-    // }
-    // else {
-    //     $('.class-select').html(localStorage['classes']);
-    // }
 }
 
 $(document).on('keydown', document, async function (e) {
@@ -699,7 +675,6 @@ $(document).on("click", "delete-submit-btn", () => {
 $(document).on("click", "#new-submit-btn", () => {
     if ($('#c-btn').hasClass('active')) {
         newClass();
-        classes_cached = false;
     }
     else if ($('#a-btn').hasClass('active')) {
         newAssignment();
@@ -790,13 +765,13 @@ $(document).on('click', '.new-type-btn', function () {
         $('.test').hide();
         $('.assignment').show();
 
-        if (!classes_cached) {
-            db.getClassAll().then((data) => {
-                localStorage['classes'] = data
+        db.getClassAll().then((data) => {
+            let html_str = ``
+            JSON.parse(data).forEach(element => {
+                html_str += `<option style="color: black;" data-class-id="${element['id']}">${element['title']}</option>`;
             });
-            classes_cached = true;
-        }
-        $('.class-select').html(localStorage['classes']);
+            $('.class-select').html(html_str);
+        })
     }
     else {
         $('.cls').hide();
@@ -976,7 +951,6 @@ $(document).on('click', '#register-btn', () => {
     let password = $('#password').val();
 
     db.userRegister(username, password).then(function (data) {
-        localStorage['user_id'] = data
         window.location.replace('/');
     })
 })
@@ -985,7 +959,6 @@ $(document).on('click', '#login-btn', () => {
     let username = $('#username').val();
     let password = $('#password').val();
     db.userLogin(username, password).then(function (data) {
-        localStorage['user_id'] = data
         window.location.replace('/');
     })
 })

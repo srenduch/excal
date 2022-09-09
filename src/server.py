@@ -102,10 +102,7 @@ def get_classes() :
     user_id = request.args.get('user_id')
     class_list = getattr(db, f"get_class_{request.args.get('selector')}")(user_id)
 
-    html_str = ''
-    for cls in class_list :
-        html_str += f"<option data-class-id={cls['id']} style=\"color: black;\" value=\"{cls['title']}\">{cls['title']}</option>\n"
-    return html_str
+    return json.dumps(class_list)
 
 # New assignment
 @app.route('/new-assignment', methods=['POST'])

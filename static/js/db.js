@@ -1,9 +1,12 @@
-export class DBInterface {
-    constructor(user_id) {
-        this.user_id = user_id
+import { DBCache } from "./cache.js";
+
+export class DBInterface extends DBCache {
+    constructor() {
+        super();
     }
 
     async userRegister(username, password) {
+        let ref = this;
         const result = await $.ajax({
             url: '/register',
             type: 'POST',
@@ -12,6 +15,7 @@ export class DBInterface {
                 password: password,
             },
             success: function (data) {
+                ref.cacheUserData(data);
             },
             error: function (data) {
                 console.error(data);
@@ -21,6 +25,7 @@ export class DBInterface {
     }
 
     async userLogin(username, password) {
+        let ref = this;
         const result = await $.ajax({
             url: '/login',
             type: 'POST',
@@ -29,6 +34,7 @@ export class DBInterface {
                 password: password,
             },
             success: function (data) {
+                ref.cacheUserData(data);
             },
             error: function (data) {
                 console.error(data);
@@ -146,6 +152,10 @@ export class DBInterface {
     }
 
     async getClassAll() {
+        if (this.classes_cached)
+            return localStorage['classes']
+
+        let ref = this;
         const result = await $.ajax({
             url: '/get-classes',
             type: 'GET',
@@ -155,6 +165,8 @@ export class DBInterface {
                 selector: 'all',
             },
             success: function (data) {
+                ref.cacheClasses(data);
+                ref.classes_cached = true;
             },
             error: function (data) {
                 console.error(data);
@@ -166,6 +178,7 @@ export class DBInterface {
     async getClassForAssignment(assignment_id) { }
 
     async addAssignment() {
+        let ref = this;
         const result = await $.ajax({
             url: '/new-assignment',
             type: 'POST',
@@ -175,6 +188,7 @@ export class DBInterface {
                 arguments: arguments,
             },
             success: function (data) {
+                ref.assignments_cached = false;
             },
             error: function (data) {
                 console.error(data);
@@ -183,6 +197,7 @@ export class DBInterface {
         return result;
     }
     async addClass() {
+        let ref = this;
         const result = await $.ajax({
             url: 'new-class',
             type: 'POST',
@@ -191,6 +206,7 @@ export class DBInterface {
                 arguments: arguments,
             },
             success: function (data) {
+                ref.classes_cached = false;
             },
             error: function (data) {
             }

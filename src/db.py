@@ -12,12 +12,20 @@ class DBInterface() :
         self.conn = sqlite3.connect(self.path, check_same_thread=False)
 
         self.__create_db()
-        self.conn.row_factory = sqlite3.Row
+        self.conn.row_factory = self.row_to_dict
+
+    # https://stackoverflow.com/a/68991192
+    def row_to_dict(self, cursor, row) -> dict:
+        data = {}
+        for idx, col in enumerate(cursor.description):
+            data[col[0]] = row[idx]
+        return data
 
     def __create_db(self) -> None :
         with open('../db/schema.sql') as f:
             self.conn.executescript(f.read())
             self.__save_db()
+
 
     """
     Shorthand for fetching all items that match a query.
@@ -193,9 +201,6 @@ class DBInterface() :
             "
         self.__execute_query(query)
         self.__save_db()
-        # query = f"INSERT INTO classes {tuple(kwargs.keys())} VALUES {tuple(kwargs.values())}"    
-        # self.__execute_query(query)
-        # self.__save_db()
 
     ###################
     # Assignment Modifiers
