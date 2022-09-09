@@ -281,31 +281,7 @@ class BigCalendar {
             $('#big-calendar-header-month').html(`W${this.weekoffset+1} ${monthstring} ${this.year}`);
             $('#big-calendar-body').remove();
 
-            let dates = this.getWeekDates;
-
-            $('.big-calendar').append(`
-            <div class="big-calendar-body big-calendar-body-week" id="big-calendar-body">
-                <div></div>
-                <div class="big-calendar-body-top-day" id="big-calendar-monday">M <div class="big-calendar-body-top-date">   ${dates[0].split('-')[2]}/${dates[0].split('-')[1]}</div></div>
-                <div class="big-calendar-body-top-day" id="big-calendar-tuesday">T <div class="big-calendar-body-top-date">  ${dates[1].split('-')[2]}/${dates[1].split('-')[1]}</div></div>
-                <div class="big-calendar-body-top-day" id="big-calendar-wednesday">W <div class="big-calendar-body-top-date">${dates[2].split('-')[2]}/${dates[2].split('-')[1]}</div></div>
-                <div class="big-calendar-body-top-day" id="big-calendar-thursday">T <div class="big-calendar-body-top-date"> ${dates[3].split('-')[2]}/${dates[3].split('-')[1]}</div></div>
-                <div class="big-calendar-body-top-day" id="big-calendar-friday">F <div class="big-calendar-body-top-date">   ${dates[4].split('-')[2]}/${dates[4].split('-')[1]}</div></div>
-                <div class="big-calendar-body-top-day" id="big-calendar-saturday">S <div class="big-calendar-body-top-date"> ${dates[5].split('-')[2]}/${dates[5].split('-')[1]}</div></div>
-                <div class="big-calendar-body-top-day" id="big-calendar-sunday">S <div class="big-calendar-body-top-date">   ${dates[6].split('-')[2]}/${dates[6].split('-')[1]}</div></div>
-
-                <div></div>
-                <div id="big-calendar-body-assignments-monday" class="big-calendar-body-assignments-day"></div>
-                <div id="big-calendar-body-assignments-tuesday" class="big-calendar-body-assignments-day"></div>
-                <div id="big-calendar-body-assignments-wednesday" class="big-calendar-body-assignments-day"></div>
-                <div id="big-calendar-body-assignments-thursday" class="big-calendar-body-assignments-day"></div>
-                <div id="big-calendar-body-assignments-friday" class="big-calendar-body-assignments-day"></div>
-                <div id="big-calendar-body-assignments-saturday" class="big-calendar-body-assignments-day"></div>
-                <div id="big-calendar-body-assignments-sunday" class="big-calendar-body-assignments-day"></div>
-
-            </div>
-
-            `);
+            
 
             let firstDay = this.getFirstDayOfWeek;
 
@@ -369,7 +345,30 @@ class BigCalendar {
                 this.endYear = this.year;
             }
 
-            $('#big-calendar-body').append(html);
+            let dates = this.getWeekDates;
+
+            $('.big-calendar').append(`
+            <div class="big-calendar-body big-calendar-body-week" id="big-calendar-body">
+                <div></div>
+                <div class="big-calendar-body-top-day" id="big-calendar-monday">M <div class="big-calendar-body-top-date">   ${dates[0].split('-')[2]}/${dates[0].split('-')[1]}</div></div>
+                <div class="big-calendar-body-top-day" id="big-calendar-tuesday">T <div class="big-calendar-body-top-date">  ${dates[1].split('-')[2]}/${dates[1].split('-')[1]}</div></div>
+                <div class="big-calendar-body-top-day" id="big-calendar-wednesday">W <div class="big-calendar-body-top-date">${dates[2].split('-')[2]}/${dates[2].split('-')[1]}</div></div>
+                <div class="big-calendar-body-top-day" id="big-calendar-thursday">T <div class="big-calendar-body-top-date"> ${dates[3].split('-')[2]}/${dates[3].split('-')[1]}</div></div>
+                <div class="big-calendar-body-top-day" id="big-calendar-friday">F <div class="big-calendar-body-top-date">   ${dates[4].split('-')[2]}/${dates[4].split('-')[1]}</div></div>
+                <div class="big-calendar-body-top-day" id="big-calendar-saturday">S <div class="big-calendar-body-top-date"> ${dates[5].split('-')[2]}/${dates[5].split('-')[1]}</div></div>
+                <div class="big-calendar-body-top-day" id="big-calendar-sunday">S <div class="big-calendar-body-top-date">   ${dates[6].split('-')[2]}/${dates[6].split('-')[1]}</div></div>
+
+                <div></div>
+                <div id="big-calendar-body-assignments-monday" class="big-calendar-body-assignments-day"></div>
+                <div id="big-calendar-body-assignments-tuesday" class="big-calendar-body-assignments-day"></div>
+                <div id="big-calendar-body-assignments-wednesday" class="big-calendar-body-assignments-day"></div>
+                <div id="big-calendar-body-assignments-thursday" class="big-calendar-body-assignments-day"></div>
+                <div id="big-calendar-body-assignments-friday" class="big-calendar-body-assignments-day"></div>
+                <div id="big-calendar-body-assignments-saturday" class="big-calendar-body-assignments-day"></div>
+                <div id="big-calendar-body-assignments-sunday" class="big-calendar-body-assignments-day"></div>
+                ${html}
+            </div>
+            `);
 
 
 
@@ -407,17 +406,29 @@ class BigCalendar {
     }
 
     get getWeekDates() {
+        console.log(this.startDay);
+        console.log(this.startMonth);
+        console.log(this.startYear);
         let dates = [];
         for (let i = 0; i < 7; i++) {
-            if (this.startDay + i > getDaysInMonth(this.startMonth + 1, this.startYear)) {
+            if (this.startDay + i > getDaysInMonth(this.startMonth, this.startYear)) {
                 if (this.startMonth + 1 > 11) {
-                    dates.push(formatDate(this.startYear + 1, this.startMonth + 1 - 12, this.startDay + i - getDaysInMonth(this.startMonth + 1, this.startYear)));
+                    dates.push(formatDate(
+                        this.startYear + 1, 
+                        this.startMonth + 1 - 12, 
+                        this.startDay + i - getDaysInMonth(this.startMonth, this.startYear)));
                 }
                 else
-                    dates.push(formatDate(this.startYear, this.startMonth + 1, this.startDay + i - getDaysInMonth(this.startMonth + 1, this.startYear)));
+                    dates.push(formatDate(
+                        this.startYear, 
+                        this.startMonth + 1, 
+                        this.startDay + i - getDaysInMonth(this.startMonth, this.startYear)));
             }
             else 
-                dates.push(formatDate(this.year, this.month, this.startDay + i));
+                dates.push(formatDate(
+                    this.year,
+                    this.month,
+                    this.startDay + i));
         }
         return dates;  
     }
