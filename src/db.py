@@ -1,9 +1,5 @@
-from re import T
 import sqlite3
-from datetime import datetime
-from math import floor
 from handlers import *
-from time import sleep
 
 """
 API for interfacing with the SQL database.
@@ -14,7 +10,6 @@ class DBInterface() :
     def __init__(self, path) :
         self.path = path
         self.conn = sqlite3.connect(self.path, check_same_thread=False)
-        # if len(self.get_class_all()) == 0 :
 
         self.__create_db()
         self.conn.row_factory = sqlite3.Row
@@ -44,49 +39,86 @@ class DBInterface() :
         self.conn.commit()
 
     ###################
+    # User Methods
+    ###################
+    """
+    Fetch a user by their id.
+    - user_id: the id of the user to fetch.
+
+    Returns: a singleton list of the user.
+    """
+    def get_user_one(self, user_id) -> list :
+        query = f"SELECT * FROM users WHERE id = {user_id}"
+        return self.__get_item(query)
+
+    def user_register(self, username, password) -> None :
+        query = f"INSERT INTO users (username, password) VALUES ('{username}', '{password}')"
+        self.__execute_query(query)
+        self.__save_db()
+
+    def user_login(self, username, password) -> list :
+        query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
+        return self.__get_item(query)
+
+    ###################
     # Assignment Getters
     ###################
 
     """
     Fetch an assignment by its id.
+    - user_id: the id of the user to get the assignment for.
     - assignment_id: the id of the assignment to fetch.
 
     Returns: a singleton list of the assignment.
     """
-    def get_assignment_one(self, assignment_id) -> list :
-        query = f"SELECT * FROM assignments WHERE id = {assignment_id}"
+    def get_assignment_one(self, user_id, assignment_id) -> list :
+        query = f"SELECT * FROM assignments \
+            WHERE id = {assignment_id} \
+            AND owner_id = {user_id} \
+            " 
         return self.__get_item(query)
 
     """
     Fetch all assignments from the database.
+    - user_id: the id of the user to get the assignments for.
 
     Returns: a list of all assignments.
     """
-    def get_assignment_all(self) -> list : 
-        query = f"SELECT * FROM assignments"
+    def get_assignment_all(self, user_id) -> list : 
+        query = f"SELECT * FROM assignments WHERE owner_id = {user_id}"
         return self.__get_item(query)
         
     """
     Fetch the most recently added assignment.
+    - user_id: the id of the user to get the assignment for.
 
     Returns: a singleton list of the most recently added assignment.
     """
-    def get_assignment_newest(self) -> list : 
-        query = " \
+    def get_assignment_newest(self, user_id) -> list : 
+        query = f" \
             SELECT * FROM assignments \
             WHERE id = (SELECT max(id) FROM assignments) \
+            AND owner_id = {user_id} \
             \
         "
         return self.__get_item(query)
 
     """
     Fetch the assignments belonging to a class.
+    - user_id: the id of the user to get the assignment for.
     - class_id: the id of the class to fetch assignments for.
 
     Returns: a list of assignments belonging to the class.
     """
-    def get_assignment_for_class(self, class_id) -> list :
-        query = f"SELECT * FROM assignments WHERE owner_class_id = {class_id}"
+    def get_assignment_for_class(self, user_id, class_id) -> list :
+        query = f"SELECT * FROM assignments WHERE class_id = {class_id} \
+            AND owner_id = {user_id} \
+            "
+        return self.__get_item(query)
+
+    def get_assignment_date_range(self, user_id, start_date, end_date) -> list :
+        query = f"SELECT * FROM assignments WHERE owner_id = {user_id} \
+            AND date BETWEEN {start_date} AND {end_date}"
         return self.__get_item(query)
 
     ###################
@@ -95,21 +127,26 @@ class DBInterface() :
 
     """
     Fetch a class by its id.
+    - user_id: the id of the user to fetch the class for.
     - class_id: the id of the class to fetch.
 
     Returns: a singleton list of the class.
     """
-    def get_class_one(self, class_id) -> list : 
-        query = f"SELECT * FROM classes WHERE id = {class_id}"
+    def get_class_one(self, user_id, class_id) -> list : 
+        query = f"SELECT * FROM classes \
+            WHERE id = {class_id} \
+            AND owner_id = {user_id} \
+            "
         return self.__get_item(query)
 
     """
     Fetch all classes from the database.
+    - user_id: the id of the user to fetch classes for.
 
     Returns: a list of all classes.
     """
-    def get_class_all(self) -> list :
-        query = f"SELECT * FROM classes"
+    def get_class_all(self, user_id) -> list :
+        query = f"SELECT * FROM classes where owner_id = {user_id}"
         return self.__get_item(query)
 
     """
@@ -118,8 +155,11 @@ class DBInterface() :
 
     Returns: a singleton list of the class containing the assignment.
     """
-    def get_class_for_assignment(self, assignment_id) -> list :
-        query = f"SELECT * FROM classes WHERE classes.id = {assignment_id}"
+    def get_class_for_assignment(self, user_id, assignment_id) -> list :
+        assignment = self.get_assignment_one(user_id, assignment_id)[0]
+        query = f"SELECT * FROM classes WHERE (id, owner_id) = \
+            ({assignment['class_id']}, {user_id}) \
+            "
         return self.__get_item(query)
 
     ###################
@@ -129,8 +169,13 @@ class DBInterface() :
     """
     Add a new assignment to the database.
     """
-    def add_assignment(self, **kwargs) -> None :
-        query = f"INSERT INTO assignments {tuple(kwargs.keys())} VALUES {tuple(kwargs.values())}"
+    def add_assignment(self, user_id, class_id, properties) -> None :
+        properties['date'], properties['time'] = properties['date'].split('T')
+        properties.update({'class_id': class_id})
+        properties.update({'owner_id': user_id})
+        query = f"INSERT INTO assignments {tuple(properties.keys())} \
+            VALUES {tuple(properties.values())} \
+            "
         self.__execute_query(query)
         self.__save_db()
 
@@ -141,42 +186,46 @@ class DBInterface() :
     """
     Add a new class to the database.
     """
-    def add_class(self, **kwargs) -> None : 
-        query = f"INSERT INTO classes {tuple(kwargs.keys())} VALUES {tuple(kwargs.values())}"    
+    def add_class(self, user_id, properties) -> None : 
+        properties.update({'owner_id': user_id})
+        query = f"INSERT INTO classes {tuple(properties.keys())} \
+            VALUES {tuple(properties.values())} \
+            "
         self.__execute_query(query)
         self.__save_db()
+        # query = f"INSERT INTO classes {tuple(kwargs.keys())} VALUES {tuple(kwargs.values())}"    
+        # self.__execute_query(query)
+        # self.__save_db()
 
     ###################
     # Assignment Modifiers
     ###################
 
-    def modify_assignment_properties(self, assignment_id, **kwargs) :
+    def modify_assignment_one(self, user_id, assignment_id, **kwargs) :
         if 'id' in kwargs.keys() and assignment_id != kwargs['id'] :
             raise ValueError("Cannot change assignment id.")
-        query = f"UPDATE assignments SET {tuple(kwargs.keys())} VALUES {tuple(kwargs.values())}\
+        # query = f"UPDATE assignments SET {tuple(kwargs.keys())} VALUES {tuple(kwargs.values())} WHERE id = {assignment_id} "
+        query = f"UPDATE assignments {tuple(kwargs.keys())} \
+            SET {tuple(kwargs.values())} \
             WHERE id = {assignment_id} \
+            AND owner_id = {user_id} \
             "
-        query = f"UPDATE assignments {tuple(kwargs.keys())} SET {tuple(kwargs.values())} WHERE id = {assignment_id}"
         self.__execute_query(query)
+        self.__save_db
     
-    def update_assignment_all_time_remaining(self) -> None :
+    def modify_assignment_all(self, user_id, properties) -> None :
         # while True :
-        for assignment in self.get_assignment_all() :
-            time_remaining = calc_time_rem(f"{assignment['date']} {assignment['time']}")
-            if int(time_remaining.split(':')[0]) : 
-                self.delete_assignment_one(assignment['id'])
-            else :
-                # print(time_remaining)
-                # print(time_remaining, assignment['id'])
-
-                # query = f"UPDATE assignments SET time_remaining = ? WHERE id = ?", (time_remaining, assignment['id'])
-
-                query = f"UPDATE assignments SET time_remaining = '{time_remaining}' WHERE id = {assignment['id']}"
-                
-                print(query)
-                # print(self.get_assignment_one(assignment['id'])[0]['time_remaining'])
-                self.__execute_query(query)
-            
+        for assignment in self.get_assignment_all(user_id) :
+            query = f"UPDATE assignments SET "
+            for property in properties.items() :
+                property = list(property)
+                if property[0] == 'time_remaining' :
+                    date_str = f"{assignment['date']}T{assignment['time']}"
+                    property[1] = f"'{calc_time_rem(date_str)}'"
+                query += f"{property[0]} = {property[1]}, "
+            query = f"{query[0:-2]} "
+            query += f"WHERE id = {assignment['id']} AND owner_id = {user_id}"
+            self.__execute_query(query)
         self.__save_db()
 
     ###################
@@ -187,19 +236,20 @@ class DBInterface() :
     Delete an assignment from the database.
     - assignment_id: the id of the assignment to delete.
     """
-    def delete_assignment_one(self, assignment_id) -> None :
-        query = f"DELETE FROM assignments WHERE id = {assignment_id}"
+    def delete_assignment_one(self, user_id, assignment_id) -> None :
+        query = f"DELETE FROM assignments WHERE id = {assignment_id} \
+            AND owner_id = {user_id}"
         self.__execute_query(query)
         self.__save_db()
 
     """
     Delete all assignments from the database.
     """
-    def delete_assignment_all(self) -> None :
-        query = f"DELETE FROM assignments"
+    def delete_assignment_all(self, user_id) -> None :
+        query = f"DELETE FROM assignments WHERE owner_id = {user_id}"
         self.__execute_query(query)
         self.__save_db()
-    
+
     ###################
     # Class Deleters
     ###################
@@ -210,16 +260,17 @@ class DBInterface() :
 
     - class_id: the id of the class to delete.
     """
-    def delete_class_one(self, class_id) -> None :
-        query = f"DELETE FROM classes WHERE id = {class_id}"
+    def delete_class_one(self, user_id, class_id) -> None :
+        query = f"DELETE FROM classes WHERE id = {class_id} \
+            AND owner_id = {user_id}"
         self.__execute_query(query)
         self.__save_db()
 
     """
     Nuke the database.
     """
-    def delete_class_all(self) -> None :
-        query = f"DELETE FROM classes"
+    def delete_class_all(self, user_id) -> None :
+        query = f"DELETE FROM classes WHERE owner_id = {user_id}"
         self.__execute_query(query)
         self.__save_db()
 
