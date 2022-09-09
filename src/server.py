@@ -89,12 +89,18 @@ def get_assignments() :
 @app.route('/get-classes', methods=['GET'])
 def get_classes() :
     user_id = request.args.get('user_id')
+    return_html = request.args.get('return_html')
     class_list = getattr(db, f"get_class_{request.args.get('selector')}")(user_id)
 
-    html_str = ''
-    for cls in class_list :
-        html_str += f"<option data-class-id={cls['id']} style=\"color: black;\" value=\"{cls['title']}\">{cls['title']}</option>\n"
-    return html_str
+    if return_html == "true":
+        html_str = ''
+        for cls in class_list :
+            html_str += f"<option data-class-id={cls['id']} style=\"color: black;\" value=\"{cls['title']}\">{cls['title']}</option>\n"
+        return html_str
+    else :
+        x = [dict(i) for i in class_list]
+        print(x)
+        return json.dumps({'classes': x})
 
 # New assignment
 @app.route('/new-assignment', methods=['POST'])

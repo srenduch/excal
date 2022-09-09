@@ -112,13 +112,14 @@ export class DBInterface {
         return result;
     }
 
-    async getClassOne(class_id) {
+    async getClassOneHtml(class_id) {
         const result = await $.ajax({
             url: '/get-classes',
             type: 'GET',
             data: {
                 user_id: localStorage['user_id'],
                 class_id: class_id,
+                return_html: true,
                 selector: 'one',
             },
             success: function (data) {
@@ -130,6 +131,46 @@ export class DBInterface {
         return result;
     }
 
+    async getClassOne(class_id) {
+        const result = await $.ajax({
+            url: '/get-classes',
+            type: 'GET',
+            data: {
+                user_id: localStorage['user_id'],
+                class_id: class_id,
+                return_html: false,
+                selector: 'one',
+            },
+            success: function (data) {
+            },
+            error: function (data) {
+                console.error(data);
+            }
+        });
+        return result;
+    }
+
+    async getClassAllHtml() {
+        const result = await $.ajax({
+            url: '/get-classes',
+            type: 'GET',
+            data: {
+                user_id: localStorage['user_id'],
+                class_id: null,
+                selector: 'all',
+                return_html: true,
+            },
+            success: function (data) {
+            },
+            error: function (data) {
+                console.error(data);
+            }
+        });
+        return result;
+    }
+
+
+
     async getClassAll() {
         const result = await $.ajax({
             url: '/get-classes',
@@ -138,6 +179,7 @@ export class DBInterface {
                 user_id: localStorage['user_id'],
                 class_id: null,
                 selector: 'all',
+                return_html: false,
             },
             success: function (data) {
             },

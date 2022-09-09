@@ -131,15 +131,15 @@ $(document).ready(function () {
 $('#newModal').on('show.bs.modal', function () {
     $('.items').addClass('base-inactive');
     $('.index-container').addClass('base-inactive');
-    if (!classes_cached) {
-        db.getClassAll().then((data) => {
-            localStorage['classes'] = data
-            $('#class-select').html(localStorage['classes'])
+    if (!classes_cached_html) {
+        db.getClassAllHtml().then((data) => {
+            localStorage['classeshtml'] = data
+            $('#class-select').html(localStorage['classeshtml'])
         })
-        classes_cached = true;
+        classes_cached_html = true;
     }
     else
-        $('#class-select').html(localStorage['classes']);
+        $('#class-select').html(localStorage['classeshtml']);
 });
 
 $('#newModal').on('hidden.bs.modal', function () {
@@ -147,6 +147,7 @@ $('#newModal').on('hidden.bs.modal', function () {
     $('.index-container').removeClass('base-inactive');
 });
 
+var classes_cached_html = false;
 var classes_cached = false;
 
 function displayNewModal(dateOverride) {
@@ -181,15 +182,43 @@ function displayNewModal(dateOverride) {
         $('#new-date-input').val(dateOverride);
     }
 
+    if (!classes_cached_html) {
+        db.getClassAllHtml().then((data) => {
+            localStorage['classeshtml'] = data;
+            $('#class-select').html(localStorage['classeshtml'])
+        })
+        classes_cached_html = true;
+    }
+    else
+        $('#class-select').html(localStorage['classeshtml']);
+}
+
+async function displayClassItemModal() {
+    $('.items').toggleClass('base-inactive');
+    $('#classItemCreationModal').modal(
+        {
+            backdrop: true,
+            keyboard: true,
+            focus: true,
+            show: true
+        }
+    );
+    
+
     if (!classes_cached) {
-        db.getClassAll().then((data) => {
+        await db.getClassAll().then((data) => {
             localStorage['classes'] = data;
-            $('#class-select').html(localStorage['classes'])
         })
         classes_cached = true;
     }
-    else
-        $('#class-select').html(localStorage['classes']);
+    let classes = JSON.parse(localStorage['classes'])['classes'];
+    console.log(classes);
+    for (let i = 0; i < classes.length; i++) {
+        console.log(classes[i]);
+        $('#classSelect').append(`<option>${classes[i]['title']}</option>`);
+    }
+
+    
 }
 
 
@@ -209,6 +238,10 @@ $(document).on('keydown', document, async function (e) {
             newAssignment();
         }
     }
+
+    else if (e.key == 'c' && e.altKey) {
+        displayClassItemModal();
+    }
 });
 
 // const assignmentCreationModalBox = document.getElementById("assignmentCreationBox");
@@ -221,7 +254,7 @@ $(document).on('click', "#addButton", function () {
 $(document).on("click", "#new-submit-btn", function () {
     if ($('#c-btn').hasClass('active')) {
         newClass();
-        classes_cached = false;
+        classes_cached_html = false;
 
     }
     else if ($('#a-btn').hasClass('active')) {
@@ -282,13 +315,13 @@ $(document).on('click', '.new-type-btn', function () {
         $('.test').hide();
         $('.assignment').show();
 
-        if (!classes_cached) {
-            db.getClassAll().then((data) => {
-                localStorage['classes'] = data
+        if (!classes_cached_html) {
+            db.getClassAllHtml().then((data) => {
+                localStorage['classeshtml'] = data
             });
-            classes_cached = true;
+            classes_cached_html = true;
         }
-        $('#class-select').html(localStorage['classes']);
+        $('#class-select').html(localStorage['classeshtml']);
     }
     else {
         $('.cls').hide();
