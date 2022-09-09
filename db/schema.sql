@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS class_item (
 
     FOREIGN KEY (class_id) REFERENCES classes(id)
     ON DELETE CASCADE
-)
+);
 
 CREATE TABLE IF NOT EXISTS class_item_exclude (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS class_item_exclude (
     date DATE NOT NULL,
     FOREIGN KEY (class_item_id) REFERENCES class_item(id)
     ON DELETE CASCADE
-)
+);
 
 CREATE TABLE IF NOT EXISTS tests (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
